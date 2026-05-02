@@ -44,18 +44,18 @@ public class AddonBatteryPackItem /*extends ItemBatteryPack*/ {
 	}
 
 	public enum AddonEnumBatteryPack {
-		BATTERY_DESH("battery_desh", 125_000L, false),
-		BATTERY_EUPHEMIUM("battery_euphemium", 500_000L, false),
-		BATTERY_SLOP("battery_slop", 833_333_333L, 20 * 60 * 10),
-		BATTERY_SPK("battery_spk", 16_666_666_667L, 20 * 60 * 5),
-		BATTERY_ELECTRO("battery_electro", 166_666_666_667L, 20 * 60 * 5); // this is insanity
+		BATTERY_DESH("battery_desh", 1_000_000L, false),
+		BATTERY_EUPHEMIUM("battery_euphemium", 5_000_000L, false),
+		BATTERY_SLOP("battery_slop", 10_000_000L, 20 * 60 * 10),
+		BATTERY_SPK("battery_spk", 100_000_000_000L, 20 * 60 * 5),
+		BATTERY_ELECTRO("battery_electro", 500_000_000_000L, 20 * 60 * 5); // this is insanity
 /*
-		BATTERY_REDSTONE("battery_redstone", 100L, false),
-		BATTERY_LEAD("battery_lead", 1_000L, false),
-		BATTERY_LITHIUM("battery_lithium", 10_000L, false),
-		BATTERY_SODIUM("battery_sodium", 50_000L, false),
-		BATTERY_SCHRABIDIUM("battery_schrabidium", 250_000L, false),
-		BATTERY_QUANTUM("battery_quantum", 1_000_000L, 20 * 60 * 60);*/
+		BATTERY_REDSTONE("battery_redstone", 1_000L, false),
+		BATTERY_LEAD("battery_lead", 10_000L, false),
+		BATTERY_LITHIUM("battery_lithium", 20_000L, false),
+		BATTERY_SODIUM("battery_sodium", 100_000L, false),
+		BATTERY_SCHRABIDIUM("battery_schrabidium", 500_000L, false),
+		BATTERY_QUANTUM("battery_quantum", 2_000_000L, 20 * 60 * 60);*/
 /*
 		public final ResourceLocation texture;
 		public final long capacity;
