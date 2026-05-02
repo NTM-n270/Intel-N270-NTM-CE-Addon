@@ -23,9 +23,9 @@ public class AddonConfig {
 	public static boolean enableSellacity = LeafiaDebug.isDevEnv;
 	public static boolean enableBarrelSidePorts = true;
 	public static boolean enableGovernedRPS = true;
-	public static double governedRPS = 60;
+	public static double governedRPS = 240;
 	public static int maxOptimalTurbineLength = 5;
-	public static double surgeTurbulenceMultiplier = 1;
+	public static double surgeTurbulenceMultiplier = 4;
 	public static int ic10maxstack = 512;
 	public static int ic10maxregisters = 64;
 	public static class ConfigOverrides {
