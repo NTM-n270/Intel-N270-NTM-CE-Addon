@@ -118,6 +118,14 @@ public class AddonItems {
 				.addRad(ItemRads.uraniumFuel)
 				.setCreativeTab(MainRegistry.controlTab);
 		public static final Item
+                leafRodLEAT210
+                = new LeafiaRodItem("LEAT-210",80000, 40000)
+                .setAppearance(ModItems.billet_uranium_fuel, BILLET, FUEL)
+                .setReactivity(0.15)
+                .setDecayProduct("depleteduranium")
+                .addRad(ItemRads.uraniumFuel)
+                .setCreativeTab(MainRegistry.controlTab);
+		public static final Item
 				leafRodHEU233
 				= new LeafiaRodItem("HEU-233",1000000, 2865)
 				.setAppearance(ModItems.billet_u233, BILLET, ISOTOPE)
