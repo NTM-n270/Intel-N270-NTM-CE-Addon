@@ -119,9 +119,25 @@ public class AddonItems {
 				.setCreativeTab(MainRegistry.controlTab);
 		public static final Item
                 leafRodLEAT210
-                = new LeafiaRodItem("LEAT-210",80000, 40000)
+                = new LeafiaRodItem("Low-Enriched Astatine-210",80000, 40000)
                 .setAppearance(ModItems.billet_uranium_fuel, BILLET, FUEL)
                 .setReactivity(0.4)
+                .setDecayProduct("depleteduranium")
+                .addRad(ItemRads.uraniumFuel)
+                .setCreativeTab(MainRegistry.controlTab);
+		public static final Item
+                leafRodMEAT210
+                = new LeafiaRodItem("Moderately-Enriched Astatine-210",160000, 80000)
+                .setAppearance(ModItems.billet_uranium_fuel, BILLET, FUEL)
+                .setReactivity(0.8)
+                .setDecayProduct("depleteduranium")
+                .addRad(ItemRads.uraniumFuel)
+                .setCreativeTab(MainRegistry.controlTab);
+		public static final Item
+                leafRodHEAT210
+                = new LeafiaRodItem("Highly-Enriched Astatine-210",320000, 160000)
+                .setAppearance(ModItems.billet_uranium_fuel, BILLET, FUEL)
+                .setReactivity(1.6)
                 .setDecayProduct("depleteduranium")
                 .addRad(ItemRads.uraniumFuel)
                 .setCreativeTab(MainRegistry.controlTab);
