@@ -121,7 +121,7 @@ public class AddonItems {
                 leafRodLEAT210
                 = new LeafiaRodItem("LEAT-210",80000, 40000)
                 .setAppearance(ModItems.billet_uranium_fuel, BILLET, FUEL)
-                .setReactivity(0.15)
+                .setReactivity(0.4)
                 .setDecayProduct("depleteduranium")
                 .addRad(ItemRads.uraniumFuel)
                 .setCreativeTab(MainRegistry.controlTab);
