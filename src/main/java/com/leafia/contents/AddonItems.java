@@ -124,8 +124,7 @@ public class AddonItems {
                 .setReactivity(0.4)
                 .setDecayProduct("depleteduranium")
                 .addRad(ItemRads.uraniumFuel)
-                .setCreativeTab(MainRegistry.controlTab)
-		        .setHeatFunction((0.00*8)^0.56*3);
+                .setCreativeTab(MainRegistry.controlTab);
 		public static final Item
                 leafRodMEAT210
                 = new LeafiaRodItem("Moderately-Enriched Astatine-210",160000, 80000)
@@ -133,7 +132,6 @@ public class AddonItems {
                 .setReactivity(0.8)
                 .setDecayProduct("depleteduranium")
                 .addRad(ItemRads.uraniumFuel)
-		        .setHeatFunction((0.00*8)^0.56*3)
                 .setCreativeTab(MainRegistry.controlTab);
 		public static final Item
                 leafRodHEAT210
@@ -142,7 +140,6 @@ public class AddonItems {
                 .setReactivity(1.6)
                 .setDecayProduct("depleteduranium")
                 .addRad(ItemRads.uraniumFuel)
-		        .setHeatFunction((0.00*8)^0.56*3)
                 .setCreativeTab(MainRegistry.controlTab);
 		public static final Item
 				leafRodHEU233
