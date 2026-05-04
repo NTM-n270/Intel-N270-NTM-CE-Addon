@@ -364,6 +364,15 @@ public class LeafiaRodItem extends AddonItemHazardBase implements IHasCustomMode
 				y = Math.pow(x*8,0.56)*2;
 				n = "("+flux+"×8)^0.56×2 "+TextFormatting.DARK_GREEN+"(FINE)";
 				break;
+			case "leat210": case "meat210":
+				y = Math.pow(x*8,0.56)*3+Math.pow(Math.max(x-2500,0)/1000,3);
+				n = "("+flux+"×8)^0.56×3 "+TextFormatting.DARK_GREEN+"(FINE)";
+				break;
+			case "heat210":
+				y = Math.pow(x*8,0.56)*3+Math.pow(Math.max(x-2500,0)/1000,3);
+				n = "("+flux+"×8)^0.56×3 "+TextFormatting.DARK_GREEN+"(FINE)";
+				break;
+				
 
 			// THORIUM
 			/*case "th232":
