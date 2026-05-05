@@ -51,6 +51,8 @@ import com.leafia.contents.machines.misc.modular_turbine.ModularTurbineComponent
 import com.leafia.contents.machines.misc.modular_turbine.ModularTurbineComponentTE;
 import com.leafia.contents.machines.misc.modular_turbine.core.MTCoreRender;
 import com.leafia.contents.machines.misc.modular_turbine.core.MTCoreTE;
+import com.leafia.contents.machines.misc.wind_turbines.medium.WindTurbineMediumRender;
+import com.leafia.contents.machines.misc.wind_turbines.medium.WindTurbineMediumTE;
 import com.leafia.contents.machines.powercores.ams.base.AMSBaseRender;
 import com.leafia.contents.machines.powercores.ams.base.AMSBaseTE;
 import com.leafia.contents.machines.powercores.ams.emitter.AMSEmitterRender;
@@ -88,6 +90,8 @@ import com.leafia.contents.network.spk_cable.SPKCableTE;
 import com.leafia.contents.nonmachines.storage.fluid.fftank.FFTankRender;
 import com.leafia.contents.nonmachines.storage.fluid.fftank.FFTankTE;
 import com.leafia.contents.nonmachines.storage.items.CrateLabelRender;
+import com.leafia.contents.worldgen.biomes.artificial.DigammaCrater.NullEntity;
+import com.leafia.contents.worldgen.biomes.artificial.DigammaCrater.NullRender;
 import com.leafia.eventbuses.LeafiaClientListener;
 import com.leafia.eventbuses.LeafiaClientListener.HandlerClient;
 import com.leafia.init.ItemRendererInit;
@@ -145,6 +149,8 @@ public class LeafiaClientProxy extends LeafiaServerProxy {
 
 			RenderingRegistry.registerEntityRenderingHandler(ElevatorEntity.class,ElevatorRender.FACTORY);
 			RenderingRegistry.registerEntityRenderingHandler(EvWeightEntity.class,EvWeightRender.FACTORY);
+
+			RenderingRegistry.registerEntityRenderingHandler(NullEntity.class,NullRender.FACTORY);
 		}
 		{
 			LCERenderSpinnyLight spinnyLightRender = new LCERenderSpinnyLight();
@@ -212,6 +218,7 @@ public class LeafiaClientProxy extends LeafiaServerProxy {
 			ClientRegistry.bindTileEntitySpecialRenderer(Reserved6TE.class,new Reserved6Render());
 
 			ClientRegistry.bindTileEntitySpecialRenderer(DebugRenderTestTE.class,new DebugRenderTestRender());
+			ClientRegistry.bindTileEntitySpecialRenderer(WindTurbineMediumTE.class,new WindTurbineMediumRender());
 		}
 		AddonJars.initJars();
 	}
