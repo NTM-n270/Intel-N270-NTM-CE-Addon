@@ -37,6 +37,7 @@ public class LeafiaSoundEvents {
 	public static SoundEvent dfc_vs;
 	public static SoundEvent dfc_tw;
 	public static SoundEvent dfc_eoh;
+	public static SoundEvent dfc_thingy;
 
 	public static SoundEvent dfc_meltdown;
 	public static SoundEvent dfc_explode;
@@ -99,6 +100,29 @@ public class LeafiaSoundEvents {
 	public static SoundEvent eversionsong7_cut;
 	public static SoundEvent digamma_record;
 
+	public static SoundEvent elevator_jam_loop;
+	public static SoundEvent elevator_jam_end;
+	public static SoundEvent local_forecast;
+
+	public static SoundEvent laser1start;
+	public static SoundEvent laser1loop;
+	public static SoundEvent laser1stop;
+	public static SoundEvent laser2start;
+	public static SoundEvent laser2loop;
+	public static SoundEvent laser2stop;
+
+	public static SoundEvent crimDoorOpenStart;
+	public static SoundEvent crimDoorOpenEnd;
+	public static SoundEvent crimDoorCloseStart;
+	public static SoundEvent crimDoorCloseEnd;
+
+	public static SoundEvent UI_BUTTON_KEYPAD;
+
+	public static SoundEvent hspActive;
+	public static SoundEvent hspIgnite;
+	public static SoundEvent dfc_detonate;
+	public static SoundEvent amsp_explode;
+
 	public static void init() {
 		// this is so retarded
 		literally_nothing = register("sdkgjalkdsjgldhsaiuhgui8asd8gy87dast67gt7wy9gty47yaw79g8734");
@@ -125,6 +149,7 @@ public class LeafiaSoundEvents {
 		dfc_vs = register("block.kfc.vs");
 		dfc_tw = register("block.kfc.tw");
 		dfc_eoh = register("block.kfc.eoh");
+		dfc_thingy = register("block.kfc.thingy");
 		dfc_meltdown = register("block.kfc.meltdown");
 		dfc_explode = register("block.kfc.explode");
 
@@ -212,6 +237,30 @@ public class LeafiaSoundEvents {
 		sbmoon_surface = register("external.sbmoon_surface");
 		eversionsong7_cut = register("external.eversionsong7cut");
 		digamma_record = register("music.wtf");
+
+		elevator_jam_loop = register("music.lsplash.elevator_jam.loop");
+		elevator_jam_end = register("music.lsplash.elevator_jam.end");
+		local_forecast = register("music.incompetech.local_forecast");
+
+		laser1start = register("block.laser1.start");
+		laser1loop = register("block.laser1.loop");
+		laser1stop = register("block.laser1.stop");
+		laser2start = register("block.laser2.start");
+		laser2loop = register("block.laser2.loop");
+		laser2stop = register("block.laser2.stop");
+
+		crimDoorOpenStart = register("external.scp_sl_gate_open.start");
+		crimDoorOpenEnd = register("external.scp_sl_gate_open.end");
+		crimDoorCloseStart = register("external.scp_sl_gate_close.start");
+		crimDoorCloseEnd = register("external.scp_sl_gate_close.end");
+
+		UI_BUTTON_KEYPAD = register("ui.button.keypad");
+
+		hspActive = register("misc.hsp_active");
+		hspIgnite = register("misc.hsp_ignite");
+		dfc_detonate = register("block.kfc.detonate");
+
+		amsp_explode = register("block.amsp.explode");
 	}
 
 	public static SoundEvent register(String name) {

@@ -24,6 +24,7 @@ import com.leafia.overwrite_contents.interfaces.IMixinEntityItem;
 import com.leafia.passive.LeafiaPassiveServer;
 import com.leafia.savedata.PlayerDeathsSavedData;
 import com.leafia.unsorted.IEntityCustomCollision;
+import com.leafia.unsorted.StructuralIntegrityHandler;
 import com.llib.group.LeafiaMap;
 import com.llib.group.LeafiaSet;
 import net.minecraft.entity.Entity;
@@ -37,6 +38,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -205,6 +207,13 @@ public class LeafiaServerListener {
 					if (entry.getValue().contains(evt.getPos()))
 						entry.getKey().updateObstacleMappings();
 				}
+				LeafiaPassiveServer.queueFunction(()->{
+					if (StructuralIntegrityHandler.AUTOMATIC) {
+						StructuralIntegrityHandler.handleBlock(evt.getWorld(),evt.getPos());
+						for (EnumFacing side : evt.getNotifiedSides())
+							StructuralIntegrityHandler.handleBlock(evt.getWorld(),evt.getPos().offset(side));
+					}
+				});
 				/*for (Entry<PWRVentInletTE,LeafiaSet<BlockPos>> entry : PWRVentInletTE.listeners.entrySet()) {
 					if (entry.getKey().isInvalid()) {
 						PWRVentInletTE.listeners.remove(entry.getKey());

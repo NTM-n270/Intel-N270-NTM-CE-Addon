@@ -20,6 +20,7 @@ import com.leafia.contents.AddonFluids;
 import com.leafia.contents.AddonItems;
 import com.leafia.contents.AddonItems.ElevatorStyles;
 import com.leafia.contents.control.battery.AddonEnumBatteryPack;
+import com.leafia.settings.AddonConfig;
 import com.llib.exceptions.LeafiaDevFlaw;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -33,40 +34,52 @@ import static com.hbm.inventory.OreDictManager.*;
 public class AddonAssemblerRecipes {
 	public static final AssemblyMachineRecipes INSTANCE = AssemblyMachineRecipes.INSTANCE;
 	public static void register() {
-		INSTANCE.register(new GenericRecipe("ass.leafia.legacy_pwrcontrol").setup(100,100)
-				.outputItems(new ItemStack(PWR.reactor_control))
-				.inputItems(
-						new OreDictStack(STEEL.ingot(),4),
-						new OreDictStack(PB.ingot(),6),
-						new OreDictStack(W.bolt(),6),
-						new ComparableStack(ModItems.motor)
-				)
-		);
-		INSTANCE.register(new GenericRecipe("ass.leafia.legacy_pwrfuel").setup(150,100)
-				.outputItems(new ItemStack(PWR.element_old))
-				.inputItems(
-						new OreDictStack(STEEL.ingot(),2),
-						new OreDictStack(OreDictManager.getReflector(),4),
-						new OreDictStack(PB.plate(),2),
-						new OreDictStack(ZR.ingot(),2)
-				)
-		);
-		INSTANCE.register(new GenericRecipe("ass.leafia.legacy_pwrconductor").setup(130,100)
-				.outputItems(new ItemStack(PWR.conductor))
-				.inputItems(
-						new OreDictStack(STEEL.ingot(),4),
-						new OreDictStack(CU.plate(),12),
-						new OreDictStack(W.wireFine(),4)
-				)
-		);
-		INSTANCE.register(new GenericRecipe("ass.leafia.legacy_pwrhatch").setup(130,150)
-				.outputItems(new ItemStack(PWR.hatch))
-				.inputItems(
-						new ComparableStack(ModBlocks.brick_concrete,1),
-						new OreDictStack(STEEL.plate(),6),
-						new ComparableStack(ModItems.circuit, 4, EnumCircuitType.BASIC)
-				)
-		);
+		if (!AddonConfig.disableAddonPWR) {
+			INSTANCE.register(new GenericRecipe("ass.leafia.legacy_pwrcontrol").setup(100,100)
+					.outputItems(new ItemStack(PWR.reactor_control))
+					.inputItems(
+							new OreDictStack(STEEL.ingot(),4),
+							new OreDictStack(PB.ingot(),6),
+							new OreDictStack(W.bolt(),6),
+							new ComparableStack(ModItems.motor)
+					)
+			);
+			INSTANCE.register(new GenericRecipe("ass.leafia.legacy_pwrfuel").setup(150,100)
+					.outputItems(new ItemStack(PWR.element_old))
+					.inputItems(
+							new OreDictStack(STEEL.ingot(),2),
+							new OreDictStack(OreDictManager.getReflector(),4),
+							new OreDictStack(PB.plate(),2),
+							new OreDictStack(ZR.ingot(),2)
+					)
+			);
+			INSTANCE.register(new GenericRecipe("ass.leafia.legacy_pwrconductor").setup(130,100)
+					.outputItems(new ItemStack(PWR.conductor))
+					.inputItems(
+							new OreDictStack(STEEL.ingot(),4),
+							new OreDictStack(CU.plate(),12),
+							new OreDictStack(W.wireFine(),4)
+					)
+			);
+			INSTANCE.register(new GenericRecipe("ass.leafia.legacy_pwrhatch").setup(130,150)
+					.outputItems(new ItemStack(PWR.hatch))
+					.inputItems(
+							new ComparableStack(ModBlocks.brick_concrete,1),
+							new OreDictStack(STEEL.plate(),6),
+							new ComparableStack(ModItems.circuit, 4, EnumCircuitType.BASIC)
+					)
+			);
+			replaceOutput("ass.pwrcontrol",new ItemStack(PWR.control));
+			replaceOutput("ass.pwrfuel",new ItemStack(PWR.element));
+			replaceOutput("ass.pwrchannel",new ItemStack(PWR.channel));
+			replaceOutput("ass.pwrheatex",new ItemStack(PWR.exchanger));
+			replaceOutput("ass.pwrreflector",new ItemStack(PWR.reflector));
+			replaceOutput("ass.pwrcasing",new ItemStack(PWR.hull));
+			replaceOutput("ass.pwrcontroller",new ItemStack(PWR.terminal));
+			replaceOutput("ass.pwrport",new ItemStack(PWR.port));
+			remove("ass.pwrneutronsource");
+			remove("ass.pwrheatsink");
+		}
 		/*
 		INSTANCE.register(new GenericRecipe("ass.leafia.msr_control").setup(100,100)
 				.outputItems(new ItemStack(AddonBlocks.LFTR.control))
@@ -153,16 +166,6 @@ public class AddonAssemblerRecipes {
 						new ComparableStack(ModItems.circuit, 4, EnumCircuitType.ADVANCED)
 				)
 		);*/
-		replaceOutput("ass.pwrcontrol",new ItemStack(PWR.control));
-		replaceOutput("ass.pwrfuel",new ItemStack(PWR.element));
-		replaceOutput("ass.pwrchannel",new ItemStack(PWR.channel));
-		replaceOutput("ass.pwrheatex",new ItemStack(PWR.exchanger));
-		replaceOutput("ass.pwrreflector",new ItemStack(PWR.reflector));
-		replaceOutput("ass.pwrcasing",new ItemStack(PWR.hull));
-		replaceOutput("ass.pwrcontroller",new ItemStack(PWR.terminal));
-		replaceOutput("ass.pwrport",new ItemStack(PWR.port));
-		remove("ass.pwrneutronsource");
-		remove("ass.pwrheatsink");
 		INSTANCE.register(new GenericRecipe("ass.leafia.light").setup(20,50)
 				.outputItems(new ItemStack(AddonBlocks.lightUnlit))
 				.inputItems(
@@ -249,7 +252,7 @@ public class AddonAssemblerRecipes {
 				)
 		);
 		makeRecipe("ass.leafia.supercooler",new ComparableStack(AddonItems.supercooler, 1), new AStack[] { new ComparableStack(ModItems.coil_copper_torus, 3), new OreDictStack(STEEL.ingot(), 3), new OreDictStack(TI.plate(), 6), new ComparableStack(ModItems.plate_polymer, 12), new OreDictStack(BIGMT.ingot(), 2), new ComparableStack(PWR.exchanger,32), new ComparableStack(ModBlocks.watz_cooler,16) }, 100);
-		makeRecipe("ass.leafia.panel",new ComparableStack(ModBlocks.control_panel_custom, 1), new AStack[]{new ComparableStack(ModItems.circuit,1,EnumCircuitType.BASIC), new OreDictStack(STEEL.block(), 1), new ComparableStack(ModItems.wire_fine, 24, Mats.MAT_COPPER.id)}, 100);
+		makeRecipe("ass.leafia.panel",new ComparableStack(ModBlocks.control_panel_custom, 1), new AStack[]{new ComparableStack(ModItems.circuit,1,EnumCircuitType.ANALOG), new OreDictStack(STEEL.plate(), 6), new ComparableStack(ModItems.wire_fine, 24, Mats.MAT_COPPER.id)}, 100);
 		makeRecipe("ass.leafia.customnukemissile",new ComparableStack(AddonItems.missile_customnuke),new AStack[]{new ComparableStack(ModItems.missile_assembly),new ComparableStack(ModItems.circuit,8,EnumCircuitType.CONTROLLER_ADVANCED.ordinal()),new OreDictStack(KEY_GRAY,4)},100);
 		{
 			INSTANCE.register(new GenericRecipe("ass.leafia.elevator_floor_s6").setup(40,50)
@@ -330,6 +333,39 @@ public class AddonAssemblerRecipes {
 							new OreDictStack(DURA.pipe(),4),
 							new ComparableStack(ModItems.motor),
 							new ComparableStack(ModItems.coil_gold_torus)
+					)
+			);
+			INSTANCE.register(new GenericRecipe("ass.leafia.reactordoor").setup(200,150)
+					.outputItems(new ItemStack(AddonBlocks.reactor_door))
+					.inputItems(
+							new OreDictStack(STEEL.plateWelded(),4),
+							new OreDictStack(PB.block(),2),
+							new OreDictStack(W.bolt(),12),
+							new OreDictStack(RUBBER.ingot(),4)
+					)
+			);
+			INSTANCE.register(new GenericRecipe("ass.leafia.crimsondoorlarge").setup(400,100)
+					.outputItems(new ItemStack(AddonBlocks.crimson_door_large))
+					.inputItems(
+							new OreDictStack(STEEL.plateCast(),12),
+							new OreDictStack(STEEL.pipe(),8),
+							new OreDictStack(ALLOY.plate(),4),
+							new ComparableStack(ModItems.plate_polymer,16),
+							new ComparableStack(ModItems.motor,6),
+							new OreDictStack(W.bolt(),16),
+							new OreDictStack("dyeRed",6)
+					)
+			);
+			INSTANCE.register(new GenericRecipe("ass.leafia.crimsondoorsmall").setup(300,100)
+					.outputItems(new ItemStack(AddonBlocks.crimson_door_small))
+					.inputItems(
+							new OreDictStack(STEEL.plateCast(),6),
+							new OreDictStack(STEEL.pipe(),4),
+							new OreDictStack(ALLOY.plate(),2),
+							new ComparableStack(ModItems.plate_polymer,8),
+							new ComparableStack(ModItems.motor,4),
+							new OreDictStack(W.bolt(),8),
+							new OreDictStack("dyeRed",4)
 					)
 			);
 		}

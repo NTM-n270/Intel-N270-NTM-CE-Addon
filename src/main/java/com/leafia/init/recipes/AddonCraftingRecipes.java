@@ -20,6 +20,7 @@ import com.leafia.contents.AddonItems.LeafiaRods;
 import com.leafia.contents.control.fuel.nuclearfuel.LeafiaRodCrafting;
 import com.leafia.contents.control.fuel.nuclearfuel.LeafiaRodItem;
 import com.leafia.contents.machines.reactors.pwr.debris.PWRDebrisCrafting;
+import com.leafia.settings.AddonConfig;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
@@ -72,20 +73,22 @@ public class AddonCraftingRecipes {
 		addShapelessAuto(new ItemStack(AddonBlocks.ff_converter),new ItemStack(AddonBlocks.ff_duct,1,2),AL.plate());
 		addShapelessAuto(new ItemStack(AddonBlocks.ff_filter),new ItemStack(AddonBlocks.ff_duct, 1, 2),new ItemStack(Blocks.HOPPER),new ItemStack(ModItems.circuit, 1, EnumCircuitType.BASIC.ordinal()));
 
-		removeRecipesForItem(reg,ModItems.ams_lens);
-
-		addShapelessAuto(new ItemStack(PWR.element_old_blank),new ItemStack(PWR.element_old));
-		addShapelessAuto(new ItemStack(PWR.element_old),new ItemStack(PWR.element_old_blank));
-		addShapelessAuto(new ItemStack(PWR.hatch_alt),new ItemStack(PWR.hatch));
-		addShapelessAuto(new ItemStack(PWR.hatch),new ItemStack(PWR.hatch_alt));
-
-		addRecipeAuto(new ItemStack(AddonItems.ams_focus_blank),"PTP","GSG","PJP",'P',ModItems.plate_dineutronium,'T',ModItems.rune_thurisaz,'G',ModBlocks.reinforced_glass,'S',AL.shell(),'J',ModItems.rune_jera);
-		addRecipeAuto(new ItemStack(ModItems.ams_lens, 1), "PFP", "GEG", "PFP", 'P', ModItems.rune_dagaz, 'G', AddonItems.ams_focus_blank, 'E', ModItems.upgrade_overdrive_3, 'F', new ItemStack(ModItems.plate_welded,1,Mats.MAT_TUNGSTEN.id));
-		addRecipeAuto(new ItemStack(AddonItems.ams_focus_omega, 1), "PFP", "REG", "PFP", 'P', ModBlocks.dfc_stabilizer, 'R', AddonItems.ams_focus_limiter, 'G', AddonItems.ams_focus_booster, 'E', ModItems.laser_crystal_digamma, 'F', ModBlocks.block_euphemium_cluster);
-		addRecipeAuto(new ItemStack(AddonItems.ams_focus_booster, 1), "PFP", "GEG", "PFP", 'P', ModItems.rune_hagalaz, 'G', ModItems.ams_lens, 'E', ModItems.upgrade_screm, 'F', ModItems.plate_desh);
-		addRecipeAuto(new ItemStack(AddonItems.ams_focus_limiter, 1), "PFP", "GEG", "PFP", 'P', ModItems.rune_isa, 'G', AddonItems.ams_focus_blank, 'E', ModItems.upgrade_power_3, 'F', ModItems.inf_water_mk2);
-		addRecipeAuto(new ItemStack(AddonItems.ams_focus_safe, 1), "PFP", "GEG", "PFP", 'P', ModItems.rune_isa, 'G', AddonItems.ams_focus_limiter, 'E', ModItems.upgrade_effect_3, 'F', AddonItems.supercooler);
-		addRecipeAuto(new ItemStack(ModItems.ams_catalyst_blank, 1), "TET", "ETE", "TET", 'T', TS.dust(), 'E', EUPH.ingot());
+		if (!AddonConfig.disableAddonPWR) {
+			addShapelessAuto(new ItemStack(PWR.element_old_blank),new ItemStack(PWR.element_old));
+			addShapelessAuto(new ItemStack(PWR.element_old),new ItemStack(PWR.element_old_blank));
+			addShapelessAuto(new ItemStack(PWR.hatch_alt),new ItemStack(PWR.hatch));
+			addShapelessAuto(new ItemStack(PWR.hatch),new ItemStack(PWR.hatch_alt));
+		}
+		if (!AddonConfig.disableAddonDFC) {
+			removeRecipesForItem(reg,ModItems.ams_lens);
+			addRecipeAuto(new ItemStack(AddonItems.ams_focus_blank),"PTP","GSG","PJP",'P',ModItems.plate_dineutronium,'T',ModItems.rune_thurisaz,'G',ModBlocks.reinforced_glass,'S',AL.shell(),'J',ModItems.rune_jera);
+			addRecipeAuto(new ItemStack(ModItems.ams_lens,1),"PFP","GEG","PFP",'P',ModItems.rune_dagaz,'G',AddonItems.ams_focus_blank,'E',ModItems.upgrade_overdrive_3,'F',new ItemStack(ModItems.plate_welded,1,Mats.MAT_TUNGSTEN.id));
+			addRecipeAuto(new ItemStack(AddonItems.ams_focus_omega,1),"PFP","REG","PFP",'P',ModBlocks.dfc_stabilizer,'R',AddonItems.ams_focus_limiter,'G',AddonItems.ams_focus_booster,'E',ModItems.laser_crystal_digamma,'F',ModBlocks.block_euphemium_cluster);
+			addRecipeAuto(new ItemStack(AddonItems.ams_focus_booster,1),"PFP","GEG","PFP",'P',ModItems.rune_hagalaz,'G',ModItems.ams_lens,'E',ModItems.upgrade_screm,'F',ModItems.plate_desh);
+			addRecipeAuto(new ItemStack(AddonItems.ams_focus_limiter,1),"PFP","GEG","PFP",'P',ModItems.rune_isa,'G',AddonItems.ams_focus_blank,'E',ModItems.upgrade_power_3,'F',ModItems.inf_water_mk2);
+			addRecipeAuto(new ItemStack(AddonItems.ams_focus_safe,1),"PFP","GEG","PFP",'P',ModItems.rune_isa,'G',AddonItems.ams_focus_limiter,'E',ModItems.upgrade_effect_3,'F',AddonItems.supercooler);
+			addRecipeAuto(new ItemStack(ModItems.ams_catalyst_blank,1),"TET","ETE","TET",'T',TS.dust(),'E',EUPH.ingot());
+		}
 
 		addRecipeAuto(new ItemStack(AddonBlocks.ff_duct_solid_shielded, 8), "SAS", "ADA", "SAS", 'S', ModBlocks.brick_compound, 'A', AddonBlocks.ff_duct, 'D', ModItems.ducttape);
 
@@ -133,7 +136,7 @@ public class AddonCraftingRecipes {
 
 		addRecipeAuto(new ItemStack(Elevators.shaft),"I I",'I',new ItemStack(ModBlocks.steel_beam));
 		addRecipeAuto(new ItemStack(AddonItems.ev_spawn),"GGG","ICI","GGG",'C',ANY_SMOKELESS.dust(),'G',new ItemStack(ModBlocks.steel_grate),'I',new ItemStack(ModBlocks.steel_beam));
-		addRecipeAuto(new ItemStack(Elevators.shaft),"IBI","IBI","IBI",'B',STEEL.block(),'I',new ItemStack(ModBlocks.steel_beam));
+		addRecipeAuto(new ItemStack(AddonItems.weight_spawn),"BIB","BIB","BIB",'B',STEEL.block(),'I',new ItemStack(ModBlocks.steel_beam));
 
 		addShapelessAuto(new ItemStack(AddonBlocks.regex_filter),new ItemStack(ModBlocks.pneumatic_tube),new ItemStack(ModItems.circuit,1,EnumCircuitType.BASIC.ordinal()));
 
@@ -142,6 +145,16 @@ public class AddonCraftingRecipes {
 
 		removeRecipesForItem(reg,ModItems.powder_ice);
 		addRecipeAuto(new ItemStack(AddonItems.door_fuckoff, 3), "WW", "WW", "WW", 'W', ModBlocks.pink_planks);
+
+		addShapelessAuto(new ItemStack(LeafiaRods.leafRodCatsmile),new ItemStack(LeafiaRods.leafRod),new ItemStack(AddonItems.dna_felid),new ItemStack(ModItems.heart_piece));
+		addShapelessAuto(new ItemStack(LeafiaRods.leafRodConfusion),new ItemStack(LeafiaRods.leafRod),new ItemStack(AddonItems.dna_canid));
+
+		addShapelessAuto(new ItemStack(AddonItems.powder_digammitite),new ItemStack(AddonItems.powder_digammitite_tiny),new ItemStack(AddonItems.powder_digammitite_tiny),new ItemStack(AddonItems.powder_digammitite_tiny),new ItemStack(AddonItems.powder_digammitite_tiny),new ItemStack(AddonItems.powder_digammitite_tiny),new ItemStack(AddonItems.powder_digammitite_tiny),new ItemStack(AddonItems.powder_digammitite_tiny),new ItemStack(AddonItems.powder_digammitite_tiny),new ItemStack(AddonItems.powder_digammitite_tiny));
+
+		removeRecipesForItem(reg,ModItems.five_htp);
+		removeRecipesForItem(reg,ModItems.xanax);
+		CraftingManager.addShapelessAuto(new ItemStack(ModItems.five_htp, 1),COAL.dust(), EUPH.dust(), ModItems.canteen_vodka, new ItemStack(AddonItems.powder_digammitite) );
+		CraftingManager.addShapelessAuto(new ItemStack(ModItems.xanax, 1),COAL.dust(), KNO.dust(), BR.dust(), new ItemStack(AddonItems.powder_digammitite_tiny) );
 
 		hack.getRegistry().register(new PWRDebrisCrafting().setRegistryName(new ResourceLocation("leafia", "lwr_debris_crafting_handler")));
 	}

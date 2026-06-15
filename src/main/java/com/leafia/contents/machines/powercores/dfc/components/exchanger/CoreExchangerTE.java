@@ -1,7 +1,12 @@
 package com.leafia.contents.machines.powercores.dfc.components.exchanger;
 
+import com.custom_hbm.sound.LCEAudioWrapper;
 import com.hbm.api.fluid.IFluidStandardReceiver;
 import com.hbm.api.fluid.IFluidStandardSender;
+import com.hbm.inventory.control_panel.ControlEventSystem;
+import com.hbm.inventory.control_panel.IControllable;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
 import com.hbm.inventory.fluid.FluidType;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTankNTM;
@@ -10,9 +15,11 @@ import com.hbm.items.machine.IItemFluidIdentifier;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.machine.TileEntityCore;
 import com.hbm.util.Tuple.Quartet;
+import com.leafia.AddonBase;
 import com.leafia.contents.machines.powercores.dfc.IDFCBase;
 import com.leafia.dev.container_utility.LeafiaPacket;
 import com.leafia.dev.machine.LCETileEntityMachineBase;
+import com.leafia.init.LeafiaSoundEvents;
 import com.leafia.overwrite_contents.interfaces.IMixinTileEntityCore;
 import com.leafia.settings.AddonConfig;
 import com.llib.group.LeafiaSet;
@@ -23,6 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -30,14 +38,62 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class CoreExchangerTE extends LCETileEntityMachineBase implements IDFCBase, ITickable, IGUIProvider, IFluidStandardSender, IFluidStandardReceiver {
+public class CoreExchangerTE extends LCETileEntityMachineBase implements IDFCBase, ITickable, IGUIProvider, IFluidStandardSender, IFluidStandardReceiver, IControllable {
 	public FluidTankNTM input = new FluidTankNTM(Fluids.COOLANT,2560_000);
 	public FluidTankNTM output = new FluidTankNTM(Fluids.COOLANT_HOT,2560_000);
 	protected BlockPos targetPosition = new BlockPos(0,0,0);
 	int inAmt = 1;
 	int outAmt = 1;
+	LCEAudioWrapper leafia$sound;
+	boolean leafia$isPlaying = false;
+	void leafia$playSound() {
+		if (leafia$sound == null) {
+			leafia$sound = AddonBase.proxy.getLoopedSoundStartStop(
+					world,
+					LeafiaSoundEvents.laser2loop,
+					LeafiaSoundEvents.laser2start,
+					LeafiaSoundEvents.laser2stop,
+					SoundCategory.BLOCKS,
+					pos.getX()+0.5f,pos.getY()+0.5f,pos.getZ()+0.5f,
+					1,1
+			).setCustomAttenuation((intended,distance)->Math.pow(Math.max(0,1-distance/50),6)/4);
+		}
+		if (!leafia$isPlaying)
+			leafia$sound.startSound();
+		leafia$isPlaying = true;
+	}
+	void leafia$stopSound() {
+		if (leafia$sound == null) return;
+		if (leafia$isPlaying)
+			leafia$sound.stopSound();
+		leafia$isPlaying = false;
+	}
+	@Override
+	public void validate(){
+		super.validate();
+		ControlEventSystem.get(world).addControllable(this);
+	}
+	@Override
+	public void invalidate(){
+		super.invalidate();
+		if (leafia$sound != null) {
+			leafia$sound.stopSound();
+			leafia$sound = null;
+		}
+		ControlEventSystem.get(world).removeControllable(this);
+	}
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		if (leafia$sound != null) {
+			leafia$sound.stopSound();
+			leafia$sound = null;
+		}
+	}
 
 	public AxisAlignedBB getRenderBoundingBox() {
 		return TileEntity.INFINITE_EXTENT_AABB;
@@ -203,6 +259,11 @@ public class CoreExchangerTE extends LCETileEntityMachineBase implements IDFCBas
                         .__write(5, amountToHeat)
                         .__write(6, tickDelay)
                         .__sendToListeners();
+        } else {
+			if (core != null)
+				leafia$playSound();
+			else
+				leafia$stopSound();
         }
     }
 
@@ -297,5 +358,22 @@ public class CoreExchangerTE extends LCETileEntityMachineBase implements IDFCBas
 	@Override
 	public @NotNull FluidTankNTM[] getReceivingTanks() {
 		return new FluidTankNTM[]{input};
+	}
+
+	@Override
+	public Map<String,DataValue> getQueryData() {
+		Map<String,DataValue> map = new HashMap<>();
+		map.put("input",new DataValueFloat(input.getFill()));
+		map.put("output",new DataValueFloat(output.getFill()));
+		return map;
+	}
+
+	@Override
+	public BlockPos getControlPos() {
+		return getPos();
+	}
+	@Override
+	public World getControlWorld() {
+		return getWorld();
 	}
 }

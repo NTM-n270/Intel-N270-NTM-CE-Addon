@@ -14,6 +14,8 @@ import com.hbm.tileentity.machine.*;
 import com.leafia.contents.AddonBlocks;
 import com.leafia.contents.AddonBlocks.PWR;
 import com.leafia.contents.AddonItems;
+import com.leafia.contents.bomb.chud.NukeChudRender;
+import com.leafia.contents.bomb.chud.NukeChudTE;
 import com.leafia.contents.bomb.missile.AddonMissileItemRender;
 import com.leafia.contents.bomb.missile.customnuke.entity.CustomNukeMissileEntity;
 import com.leafia.contents.bomb.missile.customnuke.entity.CustomNukeMissileEntityRender;
@@ -61,6 +63,7 @@ import com.leafia.contents.machines.powercores.ams.stabilizer.AMSStabilizerRende
 import com.leafia.contents.machines.powercores.ams.stabilizer.AMSStabilizerTE;
 import com.leafia.contents.machines.powercores.dfc.components.cemitter.CoreCEmitterTE;
 import com.leafia.contents.machines.powercores.dfc.components.exchanger.CoreExchangerTE;
+import com.leafia.contents.machines.powercores.dfc.components.pulser.CoreDetonatorTE;
 import com.leafia.contents.machines.powercores.dfc.render.DFCComponentRender;
 import com.leafia.contents.machines.powercores.dfc.debris.AbsorberShrapnelEntity;
 import com.leafia.contents.machines.powercores.dfc.debris.AbsorberShrapnelRender;
@@ -78,6 +81,10 @@ import com.leafia.contents.machines.reactors.pwr.blocks.wreckage.PWRMeshedWreckE
 import com.leafia.contents.machines.reactors.pwr.blocks.wreckage.RenderPWRMeshedWreck;
 import com.leafia.contents.machines.reactors.pwr.debris.PWRDebrisEntity;
 import com.leafia.contents.machines.reactors.pwr.debris.RenderPWRDebris;
+import com.leafia.contents.machines.research.amsp.analyzer.AMSPAnalyzerRender;
+import com.leafia.contents.machines.research.amsp.analyzer.AMSPAnalyzerTE;
+import com.leafia.contents.machines.research.amsp.receiver.AMSPReceiverRender;
+import com.leafia.contents.machines.research.amsp.receiver.AMSPReceiverTE;
 import com.leafia.contents.network.ff_duct.utility.FFDuctUtilityRender;
 import com.leafia.contents.network.ff_duct.utility.converter.FFConverterTE;
 import com.leafia.contents.network.ff_duct.utility.filter.FFFilterTE2;
@@ -95,6 +102,7 @@ import com.leafia.contents.worldgen.biomes.artificial.DigammaCrater.NullRender;
 import com.leafia.eventbuses.LeafiaClientListener;
 import com.leafia.eventbuses.LeafiaClientListener.HandlerClient;
 import com.leafia.init.ItemRendererInit;
+import com.leafia.settings.AddonConfig;
 import com.leafia.unsorted.ateupd.Reserved6Render;
 import com.leafia.unsorted.ateupd.Reserved6TE;
 import com.llib.exceptions.LeafiaDevFlaw;
@@ -134,6 +142,7 @@ public class LeafiaClientProxy extends LeafiaServerProxy {
 			ModelLoader.setCustomStateMapper(AddonBlocks.fluid_fluoride,new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
 			ModelLoader.setCustomStateMapper(AddonBlocks.fluid_balecorium,new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
 			ModelLoader.setCustomStateMapper(AddonBlocks.fluid_osmiridium,new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
+			ModelLoader.setCustomStateMapper(AddonBlocks.fluid_concrete,new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
 			ModelLoader.setCustomStateMapper(PWR.element,new StateMap.Builder().ignore(PWRElementBlock.stacked).build());
 			ModelLoader.setCustomStateMapper(PWR.element_old,new StateMap.Builder().ignore(PWRElementBlock.stacked).build());
 			ModelLoader.setCustomStateMapper(PWR.element_old_blank,new StateMap.Builder().ignore(PWRElementBlock.stacked).build());
@@ -156,18 +165,18 @@ public class LeafiaClientProxy extends LeafiaServerProxy {
 			LCERenderSpinnyLight spinnyLightRender = new LCERenderSpinnyLight();
 			ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySpinnyLight.class, spinnyLightRender);
 			NTMClientRegistry.bindTeisr(spinnyLightRender.getItemForRenderer(), spinnyLightRender.getRenderer(spinnyLightRender.getItemForRenderer()));
-
-			ClientRegistry.bindTileEntitySpecialRenderer(SPKCableTE.class,new SPKCableRender());
-
-			ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCore.class,new DFCCoreRender());
-			DFCComponentRender dfcComponentRender = new DFCComponentRender();
-			ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCoreEmitter.class,dfcComponentRender);
-			ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCoreReceiver.class,dfcComponentRender);
-			ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCoreStabilizer.class,dfcComponentRender);
-			ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCoreInjector.class,dfcComponentRender);
-			ClientRegistry.bindTileEntitySpecialRenderer(CoreCEmitterTE.class,dfcComponentRender);
-			ClientRegistry.bindTileEntitySpecialRenderer(CoreExchangerTE.class,dfcComponentRender);
-
+			if (!AddonConfig.disableAddonDFC) {
+				ClientRegistry.bindTileEntitySpecialRenderer(SPKCableTE.class,new SPKCableRender());
+				ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCore.class,new DFCCoreRender());
+				DFCComponentRender dfcComponentRender = new DFCComponentRender();
+				ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCoreEmitter.class,dfcComponentRender);
+				ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCoreReceiver.class,dfcComponentRender);
+				ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCoreStabilizer.class,dfcComponentRender);
+				ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCoreInjector.class,dfcComponentRender);
+				ClientRegistry.bindTileEntitySpecialRenderer(CoreCEmitterTE.class,dfcComponentRender);
+				ClientRegistry.bindTileEntitySpecialRenderer(CoreExchangerTE.class,dfcComponentRender);
+				ClientRegistry.bindTileEntitySpecialRenderer(CoreDetonatorTE.class,dfcComponentRender);
+			}
 			ClientRegistry.bindTileEntitySpecialRenderer(SignTE.class,new SignRender());
 			FFDuctUtilityRender ffUtilityRender = new FFDuctUtilityRender();
 			ClientRegistry.bindTileEntitySpecialRenderer(FFPumpTE.class,ffUtilityRender);
@@ -219,6 +228,11 @@ public class LeafiaClientProxy extends LeafiaServerProxy {
 
 			ClientRegistry.bindTileEntitySpecialRenderer(DebugRenderTestTE.class,new DebugRenderTestRender());
 			ClientRegistry.bindTileEntitySpecialRenderer(WindTurbineMediumTE.class,new WindTurbineMediumRender());
+
+			ClientRegistry.bindTileEntitySpecialRenderer(AMSPAnalyzerTE.class,new AMSPAnalyzerRender());
+			ClientRegistry.bindTileEntitySpecialRenderer(AMSPReceiverTE.class,new AMSPReceiverRender());
+
+			ClientRegistry.bindTileEntitySpecialRenderer(NukeChudTE.class,new NukeChudRender());
 		}
 		AddonJars.initJars();
 	}

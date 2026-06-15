@@ -3,7 +3,6 @@ package com.leafia.contents.debug.explosion_test;
 import com.custom_hbm.util.LCETuple.Pair;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.generic.BlockSellafieldSlaked;
-import com.hbm.explosion.vanillant.ExplosionVNT;
 import com.hbm.explosion.vanillant.standard.*;
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.interfaces.IBomb;
@@ -12,8 +11,6 @@ import com.leafia.CommandLeaf;
 import com.leafia.dev.LeafiaUtil;
 import com.leafia.dev.blocks.blockbase.AddonBlockBase;
 import com.leafia.dev.optimization.LeafiaParticlePacket.SmokeShockwaveParticle;
-import com.leafia.unsorted.ParticleBasicSmoke;
-import com.leafia.unsorted.ParticleSmokeShockwave;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -40,6 +37,8 @@ public class DebugBoomBlock extends AddonBlockBase implements IBomb {
 	public boolean onBlockActivated(World world,BlockPos pos,IBlockState state,EntityPlayer playerIn,EnumHand hand,EnumFacing facing,float hitX,float hitY,float hitZ) {
 		int x = pos.getX(), y = pos.getY(), z = pos.getZ();
 		if (world.isRemote) {
+			//ParticleNuke nuke = new ParticleNuke(world,pos);
+			//Minecraft.getMinecraft().effectRenderer.addEffect(nuke);
 			//ParticleSmokeShockwave uwu = new ParticleSmokeShockwave(world,x+0.5,y+2,z+0.5);
 			//Minecraft.getMinecraft().effectRenderer.addEffect(uwu);
 		}

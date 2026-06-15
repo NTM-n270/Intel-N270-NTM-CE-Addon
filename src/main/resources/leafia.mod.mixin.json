@@ -24,8 +24,7 @@
     "hbm.MixinRenderRBMKControlRod",
     "hbm.MixinRenderRBMKLid",
     "hbm.MixinRenderTorex",
-    "hbm.MixinRrenderControlPanel",
-    "hbm.MixinSubElementNodeEditor"
+    "hbm.MixinRrenderControlPanel"
   ],
   "mixins": [
     "hbm.MixinBalefire",
@@ -47,6 +46,7 @@
     "hbm.MixinCoreCore",
     "hbm.MixinDiamondPronter",
     "hbm.MixinDictFrame",
+    "hbm.MixinEntityChemical",
     "hbm.MixinEntityCloudFleija",
     "hbm.MixinEntityCloudFleijaRainbow",
     "hbm.MixinEntityDebrisBase",
@@ -131,7 +131,9 @@
     "hbm.MixinTileEntityMachineSiren",
     "hbm.MixinTileEntityMachineSolderingStation",
     "hbm.MixinTileEntityMachineTurbine",
+    "hbm.MixinTileEntityMachineTurbofan",
     "hbm.MixinTileEntityPipeGauge",
+    "hbm.MixinTileEntityRadiobox",
     "hbm.MixinTileEntityRBMKBase",
     "hbm.MixinTileEntityRBMKConsole",
     "hbm.MixinTileEntityRBMKControlAuto",

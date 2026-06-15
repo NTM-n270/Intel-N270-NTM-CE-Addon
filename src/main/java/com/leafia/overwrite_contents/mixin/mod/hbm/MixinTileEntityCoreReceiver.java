@@ -43,6 +43,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -199,7 +200,7 @@ public abstract class MixinTileEntityCoreReceiver extends TileEntityMachineBase 
 		if (!world.isRemote) {
 			LeafiaPacket._start(this).__write(31,targetPosition).__sendToAffectedClients();
 			if (joules >= NumScale.GIGA*100L && world.getBlockState(pos).getBlock() == ModBlocks.dfc_receiver) {
-				destructionLevel = Math.min(destructionLevel+2,400);
+				destructionLevel = Math.min(destructionLevel+world.rand.nextInt(2)+1,400);
 				if (destructionLevel > 300 && world.rand.nextInt(100) == 0) {
 					this.leafia$explode();
 					return;
@@ -536,5 +537,14 @@ public abstract class MixinTileEntityCoreReceiver extends TileEntityMachineBase 
 	@Callback(doc = "getLevel()->(level: number [0-100])")
 	public Object[] getLevel(Context context, Arguments args) {
 		return new Object[]{leafia$level};
+	}
+
+	/**
+	 * @author ntmleafia
+	 * @reason me when the lasers
+	 */
+	@Overwrite(remap = false)
+	public AxisAlignedBB getRenderBoundingBox() {
+		return INFINITE_EXTENT_AABB;
 	}
 }

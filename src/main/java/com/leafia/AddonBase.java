@@ -16,6 +16,8 @@ import com.leafia.contents.worldgen.AddonWorldGen;
 import com.leafia.contents.worldgen.NTMStructBuffer.StructLoader;
 import com.leafia.database.AirDetonationMissiles;
 import com.leafia.database.ReactorTiers;
+import com.leafia.dev.optimization.LeafiaParticlePacket;
+import com.leafia.eventbuses.LeafiaClientListener;
 import com.leafia.eventbuses.LeafiaServerListener;
 import com.leafia.init.*;
 import com.leafia.init.proxy.LeafiaServerProxy;
@@ -38,8 +40,13 @@ import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 @Mod(modid = Tags.MODID, version = "Unknown", name = Tags.MODNAME, acceptedMinecraftVersions = "[1.12.2]",
 		dependencies = "required-after:hbm@[2.5.0.2,);required:mixinbooter;after:ntmspace")
@@ -63,7 +70,7 @@ public class AddonBase {
 	public static final ResourceLocation invisible = new ResourceLocation("leafia", "textures/invisible.png");
 
 	static {
-		LeafiaSoundEvents.init();
+		//LeafiaSoundEvents.init();
 	}
 
 	public static void _initMemberClasses(Class<?> c) {
@@ -90,6 +97,8 @@ public class AddonBase {
 	public void preInit(FMLPreInitializationEvent event) {
 		// register to the event bus so that we can listen to events
 		MinecraftForge.EVENT_BUS.register(this);
+
+		LeafiaSoundEvents.init();
 
 		for (EnumBatteryPack value : EnumBatteryPack.values()) {
 			System.out.println("ENUM: "+value.name()+", ORDINAL: "+value.ordinal());
@@ -191,12 +200,16 @@ public class AddonBase {
 		AddonMixerRecipes.register();
 		AddonCompressorRecipes.register();
 		AddonPlasmaForgeRecipes.register();
+		AddonShredderRecipes.register();
+		AddonPARecipes.register();
+		AddonExposureChamberRecipes.register();
 	}
 
 	@EventHandler
 	public void fMLLoadCompleteEvent(FMLLoadCompleteEvent evt){
 		proxy.onLoadComplete(evt);
 		FalloutConfigInit.onInit();
+		_initClass(LeafiaParticlePacket.class); // make it crash here if it's missing SideOnly annotation
 
         /*
         FluidTankNTM tankNTM = new FluidTankNTM(Fluids.CRYOGEL,1000);
@@ -213,5 +226,22 @@ public class AddonBase {
 	public void serverStarting(FMLServerStartingEvent event) {
 		event.registerServerCommand(new CommandLeaf());
 		AddonAdvancements.init(event.getServer());
+		if (event.getServer().isDedicatedServer()) {
+			/*
+			try {
+				BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+				//String s = r.readLine();
+				//System.out.println(s+" INPUTTED");
+				r.close();
+			} catch (IOException e) {
+				throw new LeafiaDevFlaw(e);
+			}*/ // forget it
+		}
+	}
+
+	@EventHandler
+	public void fMLServerStoppedEvent(FMLServerStoppedEvent evt) {
+		if (evt.getSide() == Side.CLIENT)
+			LeafiaClientListener.HandlerClient.iQuit(evt);
 	}
 }

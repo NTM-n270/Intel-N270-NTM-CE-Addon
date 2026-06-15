@@ -5,6 +5,7 @@ import com.custom_hbm.contents.oilycoal.BlockCoalOil;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.ModSoundType;
 import com.hbm.blocks.ModSoundTypes;
+import com.hbm.blocks.bomb.NukeMan;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.main.MainRegistry;
 import com.hbm.render.block.BlockBakeFrame;
@@ -14,8 +15,11 @@ import com.leafia.AddonBase.AddonLoadingStage;
 import com.leafia.contents.AddonFluids.AddonFF;
 import com.leafia.contents.bomb.balefire.AshBalefire;
 import com.leafia.contents.bomb.balefire.BaleoniteBlock;
+import com.leafia.contents.bomb.chud.NukeChudBlock;
 import com.leafia.contents.bomb.digamma.DigammititeBlock;
 import com.leafia.contents.building.catwalk.railing.types.CatwalkRailingCurved;
+import com.leafia.contents.building.doors.AddonDoorGeneric;
+import com.leafia.contents.building.sign.poster.PosterBlock;
 import com.leafia.contents.building.storage.broof.BroofBlock;
 import com.leafia.contents.building.doors.AddonDoorDecl;
 import com.leafia.contents.building.doors.special.reactor_door.ReactorDoorBlock;
@@ -36,6 +40,8 @@ import com.leafia.contents.debug.rbmk_jet.DebugRBMKJetEmitter;
 import com.leafia.contents.debug.render_test.DebugRenderTestBlock;
 import com.leafia.contents.fluids.BaleCoriumFluid;
 import com.leafia.contents.fluids.BaleCoriumFluid.BaleCoriumFluidBlock;
+import com.leafia.contents.fluids.ConcreteFluid;
+import com.leafia.contents.fluids.ConcreteFluid.ConcreteFluidBlock;
 import com.leafia.contents.fluids.FluorideFluid.FluorideFluidBlock;
 import com.leafia.contents.fluids.OsmiridiumFluid.OsmiridiumFluidBlock;
 import com.leafia.contents.machines.elevators.EvBuffer;
@@ -89,6 +95,9 @@ import com.leafia.contents.machines.reactors.pwr.blocks.wreckage.PWRMeshedWreck;
 import com.leafia.contents.machines.reactors.pwr.blocks.wreckage.PWRWreckMetal;
 import com.leafia.contents.machines.reactors.pwr.blocks.wreckage.PWRWreckStone;
 import com.leafia.contents.machines.reactors.rbmk.columns.realersim.RBMKRealerSimBlock;
+import com.leafia.contents.machines.reactors.rbmk.debris.RBMKDebrisSmoke;
+import com.leafia.contents.machines.research.amsp.analyzer.AMSPAnalyzerBlock;
+import com.leafia.contents.machines.research.amsp.receiver.AMSPReceiverBlock;
 import com.leafia.contents.miscellanous.diverter.DiverterBlock;
 import com.leafia.contents.miscellanous.regex_filter.pneumatic.RegexFilterBlock;
 import com.leafia.contents.miscellanous.slop.SlopBlock;
@@ -113,11 +122,15 @@ import com.leafia.dev.blocks.legacy.LegacyBlockHazardMeta;
 import com.leafia.dev.blocks.legacy.LegacyWasteEarth;
 import com.leafia.dev.blocks.legacy.LegacyWasteIce;
 import com.leafia.dev.blocks.legacy.LegacyWasteSand;
+import com.leafia.settings.AddonConfig;
 import com.leafia.unsorted.ateupd.Reserved6Dummyable;
 import com.llib.exceptions.LeafiaDevFlaw;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialLiquid;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
@@ -206,10 +219,11 @@ public class AddonBlocks {
 	}
 
 	public static final Block door_fuckoff = new BlockPinkDoor(Material.WOOD, "door_fuckoff").setHardness(3);
-	public static final Block spk_cable = new SPKCableBlock(Material.IRON, "spk_cable").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
-	public static final Block dfc_reinforced = new AddonCoreComponent(Material.IRON, "dfc_reinforced").setHardness(5.0F).setResistance(50.0F).setCreativeTab(MainRegistry.machineTab);
-	public static final Block dfc_exchanger = new AddonCoreComponent(Material.IRON, "dfc_exchanger").setHardness(5.0F).setResistance(50.0F).setCreativeTab(MainRegistry.machineTab);
-	public static final Block dfc_cemitter = new AddonCoreComponent(Material.IRON, "dfc_cemitter").setHardness(5.0F).setResistance(50.0F).setCreativeTab(MainRegistry.machineTab);
+	public static Block spk_cable;
+	public static Block dfc_reinforced;
+	public static Block dfc_exchanger;
+	public static Block dfc_cemitter;
+	public static Block dfc_pulser;
 
 	static boolean letter_dummy = LetterSigns.dummy;
 	public static class LetterSigns {
@@ -469,11 +483,15 @@ public class AddonBlocks {
 	public static final Block rbmk_rod_realersim = new RBMKRealerSimBlock(false, "rbmk_rod_realersim", "rbmk_element_realersim").setHardness(15.0F).setResistance(100.0F).setCreativeTab(MainRegistry.machineTab);
 	public static final Block rbmk_rod_realersim_mod = new RBMKRealerSimBlock(true, "rbmk_rod_realersim_mod", "rbmk_element_realersim_mod").setHardness(5.0F).setResistance(100.0F).setCreativeTab(MainRegistry.machineTab);
 
+	public static final Block pribris_smoke = new RBMKDebrisSmoke("pribris_smoke").setCreativeTab(MainRegistry.machineTab).setHardness(50.0F).setResistance(60000000000F); // dont let the corium destroy it
+
 	public static final Block hp_boiler = new HPBoilerBlock(Material.IRON,"hp_boiler").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
 
 	public static final Block regex_filter = new RegexFilterBlock(Material.IRON,"regex_filter").setSoundType(ModSoundTypes.pipe).setHardness(0.1F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
 
 	public static final Block reactor_door = new ReactorDoorBlock(Material.IRON,AddonDoorDecl.REACTOR_DOOR,true,"reactor_door").setHardness(150.0F).setResistance(13500.0F).setCreativeTab(MainRegistry.machineTab);
+	public static final Block crimson_door_small = new AddonDoorGeneric(Material.IRON,AddonDoorDecl.CRIMSON_DOOR_SMALL,true,"crimson_door_small").setHardness(150).setResistance(135000).setCreativeTab(MainRegistry.machineTab);
+	public static final Block crimson_door_large = new AddonDoorGeneric(Material.IRON,AddonDoorDecl.CRIMSON_DOOR_LARGE,true,"crimson_door_large").setHardness(150).setResistance(135000).setCreativeTab(MainRegistry.machineTab);
 
 	public static final Block brick_concrete_dark = new ConcreteBricks(Material.ROCK,"brick_concrete_dark","brick_dark_concrete").setHardness(15.0F).setResistance(160.0F); // :leafeon_facepalm:
 
@@ -554,6 +572,17 @@ public class AddonBlocks {
 
 	public static final Block wind_turbine_medium = new WindTurbineMediumBlock(Material.IRON,"wind_turbine_medium").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
 
+	static boolean research_dummy = Research.dummy;
+	public static class Research {
+		static boolean dummy = false;
+		public static final Block amsp_analyzer = new AMSPAnalyzerBlock(Material.IRON,"amsp_analyzer").setHardness(25.0F).setResistance(60).setCreativeTab(MainRegistry.machineTab);
+		public static final Block amsp_receiver = new AMSPReceiverBlock(Material.IRON,"amsp_receiver").setHardness(25.0F).setResistance(60).setCreativeTab(MainRegistry.machineTab);
+	}
+
+	public static final Block poster_slize = new PosterBlock("poster_slize").setHardness(5).setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+
+	public static final Block nuke_chud = new NukeChudBlock(Material.IRON, "nuke_chud").setCreativeTab(MainRegistry.nukeTab).setHardness(5.0F).setResistance(6000.0F);
+
 	static {
 		if (Loader.isModLoaded("opencomputers")) {
 			oc_cable = new ComputerCableBlock(Material.IRON, "integ_cable_oc",false,"leafia/sealed_network/audio/cable_audio").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
@@ -562,6 +591,13 @@ public class AddonBlocks {
 		if (Loader.isModLoaded("computronics")) {
 			audio_cable = new AudioCableBlock(Material.IRON, "integ_cable_audio",false,"leafia/sealed_network/oc/cable_oc").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
 			audio_cable_rad = new AudioCableBlock(Material.IRON, "integ_cable_audio_rad",true,"leafia/sealed_network/oc/cable_oc_rad").setHardness(15.0F).setResistance(COMPOUND_MESH.v).setCreativeTab(MainRegistry.machineTab);
+		}
+		if (!AddonConfig.disableAddonDFC) {
+			spk_cable = new SPKCableBlock(Material.IRON, "spk_cable").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
+			dfc_reinforced = new AddonCoreComponent(Material.IRON, "dfc_reinforced").setHardness(5.0F).setResistance(50.0F).setCreativeTab(MainRegistry.machineTab);
+			dfc_exchanger = new AddonCoreComponent(Material.IRON, "dfc_exchanger").setHardness(5.0F).setResistance(50.0F).setCreativeTab(MainRegistry.machineTab);
+			dfc_cemitter = new AddonCoreComponent(Material.IRON, "dfc_cemitter").setHardness(5.0F).setResistance(50.0F).setCreativeTab(MainRegistry.machineTab);
+			dfc_pulser = new AddonCoreComponent(Material.IRON, "dfc_pulser").setHardness(5.0F).setResistance(50.0F).setCreativeTab(MainRegistry.machineTab);
 		}
 	}
 
@@ -587,17 +623,37 @@ public class AddonBlocks {
 		ModBlocks.steel_grate.setResistance(15);
 		ModBlocks.steel_grate_wide.setResistance(15);
 
-		ModBlocks.pwr_block.setCreativeTab(null);
-		ModBlocks.pwr_casing.setCreativeTab(null);
-		ModBlocks.pwr_channel.setCreativeTab(null);
-		ModBlocks.pwr_control.setCreativeTab(null);
-		ModBlocks.pwr_fuelrod.setCreativeTab(null);
-		ModBlocks.pwr_controller.setCreativeTab(null);
-		ModBlocks.pwr_heatex.setCreativeTab(null);
-		ModBlocks.pwr_heatsink.setCreativeTab(null);
-		ModBlocks.pwr_neutron_source.setCreativeTab(null);
-		ModBlocks.pwr_port.setCreativeTab(null);
-		ModBlocks.pwr_reflector.setCreativeTab(null);
+		if (!AddonConfig.disableAddonPWR) {
+			ModBlocks.pwr_block.setCreativeTab(null);
+			ModBlocks.pwr_casing.setCreativeTab(null);
+			ModBlocks.pwr_channel.setCreativeTab(null);
+			ModBlocks.pwr_control.setCreativeTab(null);
+			ModBlocks.pwr_fuelrod.setCreativeTab(null);
+			ModBlocks.pwr_controller.setCreativeTab(null);
+			ModBlocks.pwr_heatex.setCreativeTab(null);
+			ModBlocks.pwr_heatsink.setCreativeTab(null);
+			ModBlocks.pwr_neutron_source.setCreativeTab(null);
+			ModBlocks.pwr_port.setCreativeTab(null);
+			ModBlocks.pwr_reflector.setCreativeTab(null);
+		} else {
+			PWR.occs_in.setCreativeTab(null);
+			PWR.occs_out.setCreativeTab(null);
+			PWR.port.setCreativeTab(null);
+			PWR.hatch.setCreativeTab(null);
+			PWR.hatch_alt.setCreativeTab(null);
+			PWR.terminal.setCreativeTab(null);
+			PWR.computer.setCreativeTab(null);
+			PWR.element.setCreativeTab(null);
+			PWR.element_old.setCreativeTab(null);
+			PWR.element_old_blank.setCreativeTab(null);
+			PWR.channel.setCreativeTab(null);
+			PWR.conductor.setCreativeTab(null);
+			PWR.exchanger.setCreativeTab(null);
+			PWR.control.setCreativeTab(null);
+			PWR.reactor_control.setCreativeTab(null);
+			PWR.hull.setCreativeTab(null);
+			PWR.reflector.setCreativeTab(null);
+		}
 	}
 
 	public static void preInit(){
@@ -612,9 +668,22 @@ public class AddonBlocks {
 	public static Block fluid_fluoride = new FluorideFluidBlock(AddonFF.fluoride, Material.LAVA, "fluoride_fluid");
 	public static Block fluid_balecorium = new BaleCoriumFluidBlock(AddonFF.balecorium, ModBlocks.fluidcorium, "balecorium_fluid");
 	public static Block fluid_osmiridium = new OsmiridiumFluidBlock(AddonFF.osmiridium, Material.LAVA, "osmiridium_fluid");
+	public static final Material material_concrete = (new MaterialLiquid(MapColor.GRAY) {
+		@Override
+		public boolean blocksMovement() {
+			return true;
+		}
+		@Override
+		public Material setImmovableMobility() {
+			return super.setImmovableMobility();
+		}
+
+	}.setImmovableMobility());
+	public static Block fluid_concrete = new ConcreteFluidBlock(AddonFF.concrete, material_concrete, "leafia_concrete_fluid");
 	private static void registerFluidBlocks() {
 		AddonFF.fluoride.setBlock(fluid_fluoride);
 		AddonFF.balecorium.setBlock(fluid_balecorium);
 		AddonFF.osmiridium.setBlock(fluid_osmiridium);
+		AddonFF.concrete.setBlock(fluid_concrete);
 	}
 }

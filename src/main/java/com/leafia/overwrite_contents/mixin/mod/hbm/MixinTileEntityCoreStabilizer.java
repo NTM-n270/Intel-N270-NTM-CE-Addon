@@ -1,5 +1,6 @@
 package com.leafia.overwrite_contents.mixin.mod.hbm;
 
+import com.custom_hbm.sound.LCEAudioWrapper;
 import com.hbm.api.energymk2.IEnergyReceiverMK2;
 import com.hbm.inventory.control_panel.*;
 import com.hbm.inventory.control_panel.types.*;
@@ -7,8 +8,10 @@ import com.hbm.items.machine.ItemLens;
 import com.hbm.tileentity.TileEntityMachineBase;
 import com.hbm.tileentity.machine.TileEntityCore;
 import com.hbm.tileentity.machine.TileEntityCoreStabilizer;
+import com.leafia.AddonBase;
 import com.leafia.dev.container_utility.LeafiaPacket;
 import com.leafia.contents.machines.powercores.dfc.LCEItemLens;
+import com.leafia.init.LeafiaSoundEvents;
 import com.leafia.overwrite_contents.interfaces.IMixinTileEntityCore;
 import com.leafia.overwrite_contents.interfaces.IMixinTileEntityCoreStabilizer;
 import com.leafia.settings.AddonConfig;
@@ -19,6 +22,8 @@ import li.cil.oc.api.network.SimpleComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -58,6 +63,32 @@ public abstract class MixinTileEntityCoreStabilizer extends TileEntityMachineBas
 	public TileEntityCore lastGetCore;
 	@Unique
 	public BlockPos targetPosition = new BlockPos(0,0,0);
+
+	@Unique
+	LCEAudioWrapper leafia$sound;
+	@Unique boolean leafia$isPlaying = false;
+	@Unique void leafia$playSound() {
+		if (leafia$sound == null) {
+			leafia$sound = AddonBase.proxy.getLoopedSoundStartStop(
+					world,
+					LeafiaSoundEvents.laser2loop,
+					LeafiaSoundEvents.laser2start,
+					LeafiaSoundEvents.laser2stop,
+					SoundCategory.BLOCKS,
+					pos.getX()+0.5f,pos.getY()+0.5f,pos.getZ()+0.5f,
+					1,1
+			).setCustomAttenuation((intended,distance)->Math.pow(Math.max(0,1-distance/50),6)/4);
+		}
+		if (!leafia$isPlaying)
+			leafia$sound.startSound();
+		leafia$isPlaying = true;
+	}
+	@Unique void leafia$stopSound() {
+		if (leafia$sound == null) return;
+		if (leafia$isPlaying)
+			leafia$sound.stopSound();
+		leafia$isPlaying = false;
+	}
 
 	@SideOnly(Side.CLIENT)
 	@Override
@@ -117,9 +148,9 @@ public abstract class MixinTileEntityCoreStabilizer extends TileEntityMachineBas
 			}
 
 			if (lens != null && power >= demand * lens.drainMod) {
-				isOn = true;
 				TileEntityCore core = getCore();
 				if (core != null) {
+					isOn = true;
 					IMixinTileEntityCore mixinTileEntityCore = (IMixinTileEntityCore) core;
 					//core.field += (int)(watts * lens.fieldMod);
 					double eMod = mixinTileEntityCore.getDFCEnergyMod();
@@ -144,8 +175,16 @@ public abstract class MixinTileEntityCoreStabilizer extends TileEntityMachineBas
 					//.__write((byte)1,this.lens.outerColor)
 					//.__write((byte)2,this.lens.innerColor)
 					.__sendToClients(250);
-		} else if (isOn)
-			lastGetCore = getCore();
+		} else {
+			if (isOn) {
+				lastGetCore = getCore();
+				if (lastGetCore != null)
+					leafia$playSound();
+				else
+					leafia$stopSound();
+			} else
+				leafia$stopSound();
+		}
 	}
 
 	@Unique
@@ -162,7 +201,20 @@ public abstract class MixinTileEntityCoreStabilizer extends TileEntityMachineBas
 	@Override
 	public void invalidate(){
 		super.invalidate();
+		if (leafia$sound != null) {
+			leafia$sound.stopSound();
+			leafia$sound = null;
+		}
 		ControlEventSystem.get(world).removeControllable(this);
+	}
+
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		if (leafia$sound != null) {
+			leafia$sound.stopSound();
+			leafia$sound = null;
+		}
 	}
 
 	/**
@@ -354,5 +406,14 @@ public abstract class MixinTileEntityCoreStabilizer extends TileEntityMachineBas
 	@Callback(doc = "getChargePercent(); returns the charge in percent - double")
 	public Object[] getChargePercent(Context context, Arguments args) {
 		return new Object[]{100D * getPower() / (double) getMaxPower()};
+	}
+
+	/**
+	 * @author ntmleafia
+	 * @reason me when the lasers
+	 */
+	@Overwrite(remap = false)
+	public AxisAlignedBB getRenderBoundingBox() {
+		return INFINITE_EXTENT_AABB;
 	}
 }

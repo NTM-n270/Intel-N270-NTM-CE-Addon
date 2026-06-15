@@ -4,11 +4,15 @@ import com.custom_hbm.explosion.LCEExplosionNT;
 import com.custom_hbm.sound.LCEAudioWrapper;
 import com.hbm.blocks.machine.MachineFieldDisturber;
 import com.hbm.entity.effect.EntityCloudFleijaRainbow;
+import com.hbm.entity.logic.EntityBalefire;
 import com.hbm.entity.logic.EntityNukeExplosionMK3;
+import com.hbm.entity.logic.EntityNukeExplosionMK5;
+import com.hbm.explosion.ExplosionLarge;
 import com.hbm.handler.ArmorUtil;
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.inventory.fluid.FluidType;
 import com.hbm.inventory.fluid.tank.FluidTankNTM;
+import com.hbm.items.ModItems;
 import com.hbm.items.machine.ItemCatalyst;
 import com.hbm.items.special.ItemAMSCore;
 import com.hbm.lib.Library;
@@ -24,6 +28,7 @@ import com.leafia.contents.AddonItems;
 import com.leafia.contents.effects.folkvangr.EntityNukeFolkvangr;
 import com.leafia.contents.effects.folkvangr.particles.ParticleFleijaVacuum;
 import com.leafia.contents.fluids.traits.FT_DFCFuel;
+import com.leafia.contents.machines.powercores.dfc.components.pulser.CoreDetonatorTE;
 import com.leafia.contents.machines.powercores.dfc.core.CoreContainer;
 import com.leafia.contents.machines.powercores.dfc.core.CoreGUI;
 import com.leafia.contents.machines.powercores.dfc.particles.ParticleEyeOfHarmony;
@@ -33,6 +38,7 @@ import com.leafia.dev.container_utility.LeafiaPacketReceiver;
 import com.leafia.dev.custompacket.LeafiaCustomPacket;
 import com.leafia.dev.math.FiaMatrix;
 import com.leafia.dev.optimization.LeafiaParticlePacket;
+import com.leafia.dev.optimization.LeafiaParticlePacket.DFCNukeParticle;
 import com.leafia.dev.optimization.LeafiaParticlePacket.FlashParticle;
 import com.leafia.init.LeafiaSoundEvents;
 import com.leafia.overwrite_contents.interfaces.IMixinTileEntityCore;
@@ -66,6 +72,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,6 +119,8 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 	private double bonus = 0;
 	@Unique
 	private List<TileEntityCoreReceiver> absorbers = new ArrayList<>();
+	@Unique
+	private final List<CoreDetonatorTE> pulsers = new ArrayList<>();
 	@Unique
 	private boolean destroyed = false;
 	@Unique
@@ -220,9 +231,124 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 		return super.writeToNBT(compound);
 	}
 
+	@Unique boolean detonation = false;
+	@Unique int detonationTimer = 0;
+	public boolean getDetonation() {
+		return detonation;
+	}
+	public int getDetonationTimer() {
+		return detonationTimer;
+	}
+	public void setDetonation(boolean v) {
+		detonation = v;
+	}
+	@Unique int lastPulserCount = 0;
+	@Unique
+	private void tickDetonation() {
+		if (pulsers.isEmpty())
+			detonation = false;
+		if (lastPulserCount != pulsers.size())
+			detonationTimer = 0;
+		lastPulserCount = pulsers.size();
+		if (!detonation)
+			detonationTimer = 0;
+		else {
+			detonationTimer++;
+			if (detonationTimer == 20*(30-6))
+				LeafiaPacket._start(this).__write(packetKeys.PLAY_SOUND.key, 2).__sendToAll();
+			if (detonationTimer >= 20*(30-6) && detonationTimer%5 == 0) {
+				PacketThreading.createSendToAllTrackingThreadedPacket(
+						new CommandLeaf.ShakecamPacket(new String[]{
+								"type=smooth",
+								"preset=RUPTURE",
+								"blurDulling*20",
+								"bloomDulling*20",
+								"duration/4",
+								"speed*8",
+								"intensity/16",
+								"range=100"
+						}).setPos(pos),
+						new NetworkRegistry.TargetPoint(world.provider.getDimension(),pos.getX()+0.5,pos.getY()+0.5,pos.getZ()+0.5,250)
+				);
+			}
+			if (detonationTimer == 20*30-1)
+				temperature+=25000; // goodbye
+			if (detonationTimer == 20*30) {
+				world.setBlockToAir(pos);
+				int power = pulsers.size();
+				if (power <= 1) {
+					world.playSound(null,pos,LeafiaSoundEvents.machineExplode,SoundCategory.BLOCKS,30,1);
+					ExplosionLarge.spawnParticles(world,pos.getX()+0.5,pos.getY()+0.5,pos.getZ()+0.5,25);
+					LCEExplosionNT nt = new LCEExplosionNT(world, null, pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f, 150);
+					//nt.iterationLimit = 150;
+					nt.overrideResolution(24);
+					nt.ignoreBlockPoses.add(pos);
+					nt.addAttrib(LCEExplosionNT.LCEExAttrib.FIRE);
+					nt.addAttrib(LCEExplosionNT.LCEExAttrib.DFC_FALL);
+					nt.explode();
+				} else {
+					int radius = 130*(power-1);
+					if (power <= 4) {
+						world.playSound(null,pos,LeafiaSoundEvents.dfc_detonate,SoundCategory.BLOCKS,300,1);
+						DFCNukeParticle nuke = new DFCNukeParticle();
+						nuke.radius = radius;
+						if (power == 2)
+							nuke.maxAge = 20;
+						if (power == 3) {
+							nuke.flashTime = 200;
+							nuke.maxAge = 20*2+10;
+						}
+						if (power == 4) {
+							nuke.flashTime = 500;
+							nuke.maxAge = 20*4;
+						}
+						nuke.emit(new Vec3d(pos.getX()+0.5,pos.getY()+0.5,pos.getZ()+0.5),new Vec3d(0,1,0),world.provider.getDimension(),radius*5);
+						EntityNukeExplosionMK5 mk5 = EntityNukeExplosionMK5.statFac(world,radius,pos.getX()+0.5,pos.getY()+0.5,pos.getZ()+0.5);
+						world.spawnEntity(mk5);
+					} else if (power <= 7) {
+						radius += 30*(power-8);
+						world.playSound(null,pos,LeafiaSoundEvents.dfc_detonate,SoundCategory.BLOCKS,300,1);
+						DFCNukeParticle nuke = new DFCNukeParticle();
+						nuke.radius = radius;
+						EntityBalefire bf = new EntityBalefire(world);
+						bf.posX = pos.getX() + 0.5;
+						bf.posY = pos.getY() + 0.5;
+						bf.posZ = pos.getZ() + 0.5;
+						bf.destructionRange = radius;
+						nuke.emit(new Vec3d(pos.getX()+0.5,pos.getY()+0.5,pos.getZ()+0.5),new Vec3d(0,1,0),world.provider.getDimension(),radius*5);
+						world.spawnEntity(bf);
+					} else {
+						radius += 30*(power-8);
+						radius += 100*(power-8);
+						EntityNukeExplosionMK3 exp = new EntityNukeExplosionMK3(world);
+						exp.posX = pos.getX();
+						exp.posY = pos.getY();
+						exp.posZ = pos.getZ();
+						exp.destructionRange = radius;
+						exp.speed = 25;
+						exp.coefficient = 1.0F;
+						exp.waste = false;
+
+						PacketThreading.createSendToAllTrackingThreadedPacket(new CommandLeaf.ShakecamPacket(new String[]{"type=smooth", "preset=PWR_NEAR", "duration*2", "intensity*1.5", "range=200"}).setPos(pos), new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 300));
+						world.playSound(null, pos, LeafiaSoundEvents.dfc_explode, SoundCategory.BLOCKS, 100, 1);
+						destroyed = true;
+						world.spawnEntity(exp);
+						EntityCloudFleijaRainbow cloud = new EntityCloudFleijaRainbow(world, exp.destructionRange);
+						cloud.posX = pos.getX();
+						cloud.posY = pos.getY();
+						cloud.posZ = pos.getZ();
+						world.spawnEntity(cloud);
+					}
+				}
+			}
+		}
+		pulsers.clear();
+	}
 
 	@Unique
 	private void tickServer() {
+		tickDetonation();
+		if (detonationTimer >= 20*30) return;
 		lastStabilizers = stabilizers;
 		stabilizers = 0;
 
@@ -257,7 +383,7 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 		}
 
 		expellingSpk = 0;
-		if (inventory.getStackInSlot(1).getItem() instanceof ItemAMSCore) {
+		if (inventory.getStackInSlot(1).getItem() instanceof ItemAMSCore || inventory.getStackInSlot(1).getItem() == ModItems.glitch) {
 			if (tagA != null && tagB != null) {
 				meltingPoint = Math.min(1500000, Math.min(LCEItemCatalyst.getMelting(catalystA), LCEItemCatalyst.getMelting(catalystB)));
 
@@ -282,12 +408,14 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 				if (temperature >= 100) {
 					if (!wasActive) {
 						wasActive = true;
-						world.playSound(null,pos.getX()+0.5,pos.getY()+0.5,pos.getZ()+0.5,LeafiaSoundEvents.fuckingfortnite,SoundCategory.BLOCKS,100,1);
-						PacketThreading.createSendToAllTrackingThreadedPacket(new CommandLeaf.ShakecamPacket(new String[]{"type=smooth", "preset=RUPTURE", "duration/4", "blurDulling*2", "intensity/2", "range=350"}).setPos(pos), new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 400));
-						PacketThreading.createSendToAllTrackingThreadedPacket(new CommandLeaf.ShakecamPacket(new String[]{"type=smooth", "preset=QUAKE", "intensity/2", "range=500"}).setPos(pos), new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 550));
-						particleTicks = 20;
-						FlashParticle flash = new FlashParticle();
-						flash.emit(new Vec3d(pos).add(0.5, 0.5, 0.5),new Vec3d(0, 1, 0),world.provider.getDimension(),500);
+						if (detonationTimer < 20*30-1) {
+							world.playSound(null,pos.getX()+0.5,pos.getY()+0.5,pos.getZ()+0.5,LeafiaSoundEvents.fuckingfortnite,SoundCategory.BLOCKS,100,1);
+							PacketThreading.createSendToAllTrackingThreadedPacket(new CommandLeaf.ShakecamPacket(new String[]{"type=smooth", "preset=RUPTURE", "duration/4", "blurDulling*2", "intensity/2", "range=350"}).setPos(pos), new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 400));
+							PacketThreading.createSendToAllTrackingThreadedPacket(new CommandLeaf.ShakecamPacket(new String[]{"type=smooth", "preset=QUAKE", "intensity/2", "range=500"}).setPos(pos), new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 550));
+							particleTicks = 20;
+							FlashParticle flash = new FlashParticle();
+							flash.emit(new Vec3d(pos).add(0.5, 0.5, 0.5),new Vec3d(0, 1, 0),world.provider.getDimension(),500);
+						}
 					}
 					if (particleTicks > 0) {
 						LeafiaColor col = new LeafiaColor(colorCatalyst);
@@ -436,7 +564,7 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 
 					LCEExplosionNT nt = new LCEExplosionNT(world, null, pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f, 50);
 					nt.maxExplosionResistance = 28;
-					nt.iterationLimit = 150;
+					//nt.iterationLimit = 150;
 					nt.ignoreBlockPoses.add(pos);
 					nt.explode();
 
@@ -523,6 +651,12 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 		return Minecraft.getMinecraft().isGamePaused();
 	}
 
+	int lastPulserPower;
+	@Override
+	public int lastPulserPower() {
+		return lastPulserPower;
+	}
+
 	// =====================
 	// === Client logic ====
 	// =====================
@@ -530,6 +664,8 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 	private void tickClient() {
 		ticks++;
 		client_maxDial = world.rand.nextDouble() * 0.08 + 0.9;
+		lastPulserPower = pulsers.size();
+		pulsers.clear();
 
 		if (client_sfx != null) {
 			if (temperature >= 100 && !sfxPlaying) {
@@ -708,7 +844,7 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 			if (isFixTool(e)) continue;
 			if (e instanceof EntityFallingBlock) continue;
 			boolean isPlayer = e instanceof EntityPlayer;
-			if (!(isPlayer && ArmorUtil.checkForHazmat((EntityPlayer) e))) {
+			if (!(isPlayer && (ArmorUtil.checkForHazmat((EntityPlayer) e) || ArmorUtil.checkArmor((EntityPlayer)e,ModItems.hev_helmet,ModItems.hev_plate,ModItems.hev_legs,ModItems.hev_boots)))) {
 				if (!(Library.isObstructed(world, pos.getX() + 0.5, pos.getY() + 0.5 + 6, pos.getZ() + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ))) {
 					if (!isPlayer || (isPlayer && !((EntityPlayer) e).capabilities.isCreativeMode))
 						e.attackEntityFrom(LeafiaDamageSource.dfc, (int) (this.temperature / 100));
@@ -768,6 +904,8 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 				.__write(packetKeys.JAMMER.key, jammerPos)
 				.__write(packetKeys.COLLAPSE.key, collapsing)
 				.__write(packetKeys.HASCORE.key, hasCore)
+				.__write(packetKeys.DETONATION.key, detonation)
+				.__write(packetKeys.DET_TIMER.key, detonationTimer)
 				.__sendToAffectedClients();
 	}
 
@@ -804,17 +942,32 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 
 	@Unique
 	private int getCorePower() {
+		if (inventory.getStackInSlot(1).getItem() == ModItems.glitch)
+			return 7500;
 		return ItemAMSCore.getPowerBase(inventory.getStackInSlot(1));
 	}
 
 	@Unique
 	private float getCoreHeat() {
+		if (inventory.getStackInSlot(1).getItem() == ModItems.glitch)
+			return 0.4F;
 		return ItemAMSCore.getHeatBase(inventory.getStackInSlot(1));
 	}
 
 	@Unique
 	private float getCoreFuel() {
+		if (inventory.getStackInSlot(1).getItem() == ModItems.glitch)
+			return 3;
 		return ItemAMSCore.getFuelBase(inventory.getStackInSlot(1));
+	}
+
+	@Inject(method = "getRenderBoundingBox",at = @At(value = "HEAD"),require = 1,cancellable = true)
+	private void leafia$onGetRenderBoundingBox(CallbackInfoReturnable<AxisAlignedBB> cir) {
+		if (inventory.getStackInSlot(1).getItem() == ModItems.glitch) {
+			cir.setReturnValue(INFINITE_EXTENT_AABB);
+			cir.cancel();
+			return;
+		}
 	}
 
 	boolean isFixTool(Entity e) {
@@ -877,10 +1030,13 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 						} else if (type == 3 && explosionsSFX != null) {
 							explosionsSFX.startSound();
 							finalPhase = true;
-						}
+						} else if (type == 4)
+							overloadSFX.stopSound();
 						break;
 					case COLLAPSE: collapsing = (double) value; break;
 					case HASCORE: hasCore = (boolean) value; break;
+					case DETONATION: detonation = (boolean)value; break;
+					case DET_TIMER: detonationTimer = (int)value; break;
 				}
 			}
 		}
@@ -1107,6 +1263,12 @@ public abstract class MixinTileEntityCore extends TileEntityMachineBase implemen
 	@Override
 	public List<TileEntityCoreReceiver> getDFCAbsorbers() {
 		return absorbers;
+	}
+
+	@Unique
+	@Override
+	public List<CoreDetonatorTE> getDFCPulsers() {
+		return pulsers;
 	}
 
 	@Unique

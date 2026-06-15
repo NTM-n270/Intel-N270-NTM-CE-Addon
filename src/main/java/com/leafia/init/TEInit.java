@@ -1,6 +1,8 @@
 package com.leafia.init;
 
 import com.leafia.AddonBase;
+import com.leafia.contents.bomb.chud.NukeChudTE;
+import com.leafia.contents.building.doors.AddonDoorTE;
 import com.leafia.contents.building.storage.broof.BroofTE;
 import com.leafia.contents.building.doors.special.reactor_door.ReactorDoorTE;
 import com.leafia.contents.building.light.LightTE;
@@ -30,6 +32,7 @@ import com.leafia.contents.machines.powercores.ams.emitter.AMSEmitterTE;
 import com.leafia.contents.machines.powercores.ams.stabilizer.AMSStabilizerTE;
 import com.leafia.contents.machines.powercores.dfc.components.cemitter.CoreCEmitterTE;
 import com.leafia.contents.machines.powercores.dfc.components.exchanger.CoreExchangerTE;
+import com.leafia.contents.machines.powercores.dfc.components.pulser.CoreDetonatorTE;
 import com.leafia.contents.machines.processing.mixingvat.MixingVatTE;
 import com.leafia.contents.machines.processing.mixingvat.proxy.MixingVatProxy;
 import com.leafia.contents.machines.reactors.lftr.components.arbitrary.MSRArbitraryTE;
@@ -48,6 +51,9 @@ import com.leafia.contents.machines.reactors.pwr.blocks.components.port.PWRPortT
 import com.leafia.contents.machines.reactors.pwr.blocks.components.terminal.PWRTerminalTE;
 import com.leafia.contents.machines.reactors.pwr.blocks.wreckage.PWRMeshedWreckEntity;
 import com.leafia.contents.machines.reactors.rbmk.columns.realersim.RBMKRealerSimTE;
+import com.leafia.contents.machines.reactors.rbmk.debris.RBMKDebrisSmokeTE;
+import com.leafia.contents.machines.research.amsp.analyzer.AMSPAnalyzerTE;
+import com.leafia.contents.machines.research.amsp.receiver.AMSPReceiverTE;
 import com.leafia.contents.miscellanous.diverter.DiverterTE;
 import com.leafia.contents.miscellanous.regex_filter.pneumatic.RegexFilterTE;
 import com.leafia.contents.miscellanous.slop.SlopTE;
@@ -63,6 +69,7 @@ import com.leafia.contents.network.pipe_amat.AmatDuctTE;
 import com.leafia.contents.network.pipe_amat.charger.AmatDuctChargerTE;
 import com.leafia.contents.network.spk_cable.SPKCableTE;
 import com.leafia.contents.nonmachines.storage.fluid.fftank.FFTankTE;
+import com.leafia.settings.AddonConfig;
 import com.leafia.unsorted.ateupd.Reserved6TE;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -75,9 +82,12 @@ public class TEInit {
 			register(DebugSourceTE.class,"debug_ff_source");
 			register(DebugTankTE.class,"debug_ff_tank");
 		}
-		register(SPKCableTE.class,"spk_cable_te");
-		register(CoreCEmitterTE.class,"core_creative_emitter_te");
-		register(CoreExchangerTE.class,"core_exchanger_te");
+		if (!AddonConfig.disableAddonDFC) {
+			register(SPKCableTE.class,"spk_cable_te");
+			register(CoreCEmitterTE.class,"core_creative_emitter_te");
+			register(CoreExchangerTE.class,"core_exchanger_te");
+			register(CoreDetonatorTE.class,"core_detonator_te");
+		}
 		register(SignTE.class,"letter_sign_te");
 		register(FFDuctTE.class,"ff_duct_te");
 		register(FFPumpTE.class,"ff_pump_te");
@@ -136,6 +146,11 @@ public class TEInit {
 		register(Reserved6TE.class,"reserved6_te");
 		register(DebugRenderTestTE.class,"debug_render_te");
 		register(WindTurbineMediumTE.class,"wind_turbine_medium_te");
+		register(RBMKDebrisSmokeTE.class,"pribris_smoke_te");
+		register(AddonDoorTE.class,"door_te");
+		register(AMSPAnalyzerTE.class,"amsp_analyzer_te");
+		register(AMSPReceiverTE.class,"amsp_receiver_te");
+		register(NukeChudTE.class,"nuke_chud_te");
 	}
 	private static void register(Class<? extends TileEntity> clazz,String res) {
 		GameRegistry.registerTileEntity(clazz,new ResourceLocation(AddonBase.MODID,res));

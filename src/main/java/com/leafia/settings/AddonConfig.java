@@ -1,9 +1,12 @@
 package com.leafia.settings;
 
+import com.hbm.config.BombConfig;
 import com.hbm.config.GeneralConfig;
+import com.hbm.config.MachineConfig;
 import com.leafia.contents.control.fuel.nuclearfuel.LeafiaRodItem;
 import com.leafia.dev.LeafiaDebug;
 import com.leafia.settings._ConfigBuilder.LeafiaConfigError;
+import com.leafia.unsorted.StructuralIntegrityHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,17 +32,24 @@ public class AddonConfig {
 	public static int ic10maxstack = 512;
 	public static int ic10maxregisters = 64;
 	public static boolean schizoMode = false;
+	public static boolean disableAddonDFC = false;
+	public static boolean disableAddonPWR = false;
+	public static boolean disableAddonZIRNOX = false;
+	public static boolean bullshitUnits = false;
 	public static class ConfigOverrides {
 		public static boolean blockReplacement = true;
+		public static boolean safeCommit = true;
+		public static boolean holdDoorRedstone = true;
 		public static void applyGeneralConfig() {
 			GeneralConfig.enableBlockReplcement = blockReplacement;
+			BombConfig.safeCommit = safeCommit;
+			MachineConfig.holdDoorRedstone = holdDoorRedstone;
 		}
 	}
 	public static void loadFromConfig(){
-		_ConfigBuilder builder = new _ConfigBuilder("leafia");
+		_ConfigBuilder builder = new _ConfigBuilder("leafia2");
 		builder._separator();
-		builder._category("IMPORTANT: The configs will not apply by default! Add ! on start of each configs to apply.");
-		builder._category("Example: enableBarrelSidePorts: true -> !enableBarrelSidePorts: false");
+		builder._category("IMPORTANT: The configs will not apply by default! Remove ? on start of each configs to apply.");
 		builder._pushLine();
 		builder._category("MIXINS");
 		{
@@ -50,7 +60,22 @@ public class AddonConfig {
 		builder._category("OVERRIDE");
 		{
 			// I do not care about performance. This addon is aimed for newer playerbase.
+			builder._comment("LCA is meant for people who love CE but also used to EE");
 			ConfigOverrides.blockReplacement = builder._boolean("ovr_enableBlockReplacement",true);
+			builder._comment("1.7 behavior sucks");
+			ConfigOverrides.holdDoorRedstone = builder._boolean("ovr_holdDoorRedstone",true);
+			builder._comment("Disable this if you love crashes");
+			ConfigOverrides.safeCommit = builder._boolean("ovr_safeCommit",true);
+		}
+		builder._separator();
+		builder._category("OVERWRITES AND REPLACEMENTS (GAMEPLAY)");
+		{
+			builder._comment("Enable this if you would like the DFC to have the NTMain behavior");
+			disableAddonDFC = builder._boolean("disableAddonDFC",false);
+			builder._comment("Enable this if you would like the PWR to have the NTMain behavior");
+			disableAddonPWR = builder._boolean("disableAddonPWR",false);
+			builder._comment("Enable this if you would like the ZIRNOX to have the NTMain behavior");
+			disableAddonZIRNOX = builder._boolean("disableAddonZIRNOX",false);
 		}
 		builder._separator();
 		builder._category("GENERAL");
@@ -86,6 +111,12 @@ public class AddonConfig {
 			builder._comment("Every biome acts like the digamma crater biome");
 			schizoMode = builder._boolean("enableSchizoMode",false);
 
+			builder._comment("(WIP) Changes this mod from using units you know to some bullshit units that god knows");
+			bullshitUnits = builder._boolean("enableSludgeUnits",false);
+
+			builder._comment("Whether floating blocks and weirdly built buildings should collapse or not (WARNING: VERY LAGGY & CHALLENGING!)");
+			StructuralIntegrityHandler.AUTOMATIC = builder._boolean("enableStructuralIntegrity",false);
+
 			builder._comment("IC10 nodes will throw StackOverflow when stack count exceeds this number");
 			ic10maxstack = builder._integer("ic10maxstack",512);
 
@@ -110,9 +141,8 @@ public class AddonConfig {
 		}
 		public static Map<String,RodInfo> map = new HashMap<>();
 		public static void loadFromConfig() {
-			_ConfigBuilder builder = new _ConfigBuilder("generic_fuels");
-			builder._category("IMPORTANT: The configs will not apply by default! Add ! on start of each lines to apply.");
-			builder._category("Example: !enableBarrelSidePorts: false");
+			_ConfigBuilder builder = new _ConfigBuilder("generic_fuels2");
+			builder._category("IMPORTANT: The configs will not apply by default! Remove ? on start of each lines to apply.");
 			builder._separator();
 			builder._autoLineBreak = false;
 			for (Entry<String,LeafiaRodItem> entry : LeafiaRodItem.fromResourceMap.entrySet()) {

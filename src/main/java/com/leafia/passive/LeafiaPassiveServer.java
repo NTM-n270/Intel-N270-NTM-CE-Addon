@@ -7,6 +7,7 @@ import com.leafia.contents.machines.reactors.pwr.blocks.wreckage.PWRMeshedWreck;
 import com.leafia.dev.LeafiaDebug.Tracker;
 import com.leafia.eventbuses.LeafiaServerListener.Unsorted;
 import com.leafia.savedata.FalloutSavedData;
+import com.leafia.unsorted.StructuralIntegrityHandler;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public class LeafiaPassiveServer {
 	}
 	public static final Set<Node> tickedNodes = new HashSet<>();
 	public static void priorTick() {
+		StructuralIntegrityHandler.blockedPoses.clear();
+		StructuralIntegrityHandler.calculations = 0;
 		tickedNodes.clear();
 		//if (ModItems.wand_leaf.darnit != null)
 		//	ModItems.wand_leaf.darnit.run();

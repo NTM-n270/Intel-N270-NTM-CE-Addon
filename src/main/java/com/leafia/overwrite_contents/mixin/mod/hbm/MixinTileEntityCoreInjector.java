@@ -1,6 +1,11 @@
 package com.leafia.overwrite_contents.mixin.mod.hbm;
 
+import com.custom_hbm.sound.LCEAudioWrapper;
 import com.hbm.api.fluid.IFluidStandardReceiver;
+import com.hbm.inventory.control_panel.ControlEventSystem;
+import com.hbm.inventory.control_panel.IControllable;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
 import com.hbm.inventory.fluid.FluidType;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTankNTM;
@@ -9,9 +14,11 @@ import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.TileEntityMachineBase;
 import com.hbm.tileentity.machine.TileEntityCore;
 import com.hbm.tileentity.machine.TileEntityCoreInjector;
+import com.leafia.AddonBase;
 import com.leafia.contents.machines.powercores.dfc.components.injector.CoreInjectorContainer;
 import com.leafia.contents.machines.powercores.dfc.components.injector.CoreInjectorGUI;
 import com.leafia.dev.container_utility.LeafiaPacket;
+import com.leafia.init.LeafiaSoundEvents;
 import com.leafia.overwrite_contents.interfaces.IMixinTileEntityInjector;
 import com.leafia.settings.AddonConfig;
 import net.minecraft.client.gui.GuiScreen;
@@ -20,6 +27,8 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -33,11 +42,62 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Mixin(value = TileEntityCoreInjector.class)
-public abstract class MixinTileEntityCoreInjector extends TileEntityMachineBase implements ITickable, IFluidStandardReceiver, IMixinTileEntityInjector, IGUIProvider {
+public abstract class MixinTileEntityCoreInjector extends TileEntityMachineBase implements ITickable, IFluidStandardReceiver, IMixinTileEntityInjector, IGUIProvider, IControllable {
 	@Shadow(remap = false) public FluidTankNTM[] tanks;
 	@Unique public TileEntityCore lastGetCore;
 	@Unique public BlockPos targetPosition = new BlockPos(0,0,0);
+
+	@Unique LCEAudioWrapper leafia$sound;
+	@Unique boolean leafia$isPlaying = false;
+	@Unique void leafia$playSound() {
+		if (leafia$sound == null) {
+			leafia$sound = AddonBase.proxy.getLoopedSoundStartStop(
+					world,
+					LeafiaSoundEvents.laser2loop,
+					LeafiaSoundEvents.laser2start,
+					LeafiaSoundEvents.laser2stop,
+					SoundCategory.BLOCKS,
+					pos.getX()+0.5f,pos.getY()+0.5f,pos.getZ()+0.5f,
+					1,1
+			).setCustomAttenuation((intended,distance)->Math.pow(Math.max(0,1-distance/50),6)/4);
+		}
+		if (!leafia$isPlaying)
+			leafia$sound.startSound();
+		leafia$isPlaying = true;
+	}
+	@Unique void leafia$stopSound() {
+		if (leafia$sound == null) return;
+		if (leafia$isPlaying)
+			leafia$sound.stopSound();
+		leafia$isPlaying = false;
+	}
+	@Override
+	public void validate(){
+		super.validate();
+		ControlEventSystem.get(world).addControllable(this);
+	}
+	@Override
+	public void invalidate(){
+		super.invalidate();
+		if (leafia$sound != null) {
+			leafia$sound.stopSound();
+			leafia$sound = null;
+		}
+		ControlEventSystem.get(world).removeControllable(this);
+	}
+
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		if (leafia$sound != null) {
+			leafia$sound.stopSound();
+			leafia$sound = null;
+		}
+	}
 
 	public MixinTileEntityCoreInjector(int scount) {
 		super(scount);
@@ -85,6 +145,11 @@ public abstract class MixinTileEntityCoreInjector extends TileEntityMachineBase 
 			}
 			this.markDirty();
 			this.networkPackNT(250);
+		} else {
+			if (core != null)
+				leafia$playSound();
+			else
+				leafia$stopSound();
 		}
 	}
 
@@ -142,5 +207,31 @@ public abstract class MixinTileEntityCoreInjector extends TileEntityMachineBase 
 	@SideOnly(Side.CLIENT)
 	public GuiScreen provideGUI(int i,EntityPlayer entityPlayer,World world,int i1,int i2,int i3) {
 		return new CoreInjectorGUI(entityPlayer.inventory,(TileEntityCoreInjector)(IMixinTileEntityInjector)this);
+	}
+
+	/**
+	 * @author ntmleafia
+	 * @reason me when the lasers
+	 */
+	@Overwrite(remap = false)
+	public AxisAlignedBB getRenderBoundingBox() {
+		return INFINITE_EXTENT_AABB;
+	}
+
+	@Override
+	public Map<String,DataValue> getQueryData() {
+		Map<String,DataValue> map = new HashMap<>();
+		map.put("tankA",new DataValueFloat(tanks[0].getFill()));
+		map.put("tankB",new DataValueFloat(tanks[0].getFill()));
+		return map;
+	}
+
+	@Override
+	public BlockPos getControlPos() {
+		return getPos();
+	}
+	@Override
+	public World getControlWorld() {
+		return getWorld();
 	}
 }

@@ -6,12 +6,14 @@ import com.hbm.main.MainRegistry;
 import com.hbm.particle.ParticleRBMKMush;
 import com.leafia.contents.machines.misc.modular_turbine.ParticleMTSteam;
 import com.leafia.contents.machines.powercores.dfc.particles.ParticleDFC;
+import com.leafia.contents.machines.powercores.dfc.particles.ParticleNuke;
 import com.leafia.contents.machines.reactors.rbmk.effects.ParticleJumpingRBMK;
 import com.leafia.contents.machines.reactors.rbmk.effects.ParticleRBMKJet;
 import com.leafia.dev.math.FiaMatrix;
 import com.leafia.dev.optimization.bitbyte.LeafiaBuf;
 import com.leafia.dev.optimization.diagnosis.RecordablePacket;
 import com.leafia.overwrite_contents.interfaces.IMixinParticleRBMKMush;
+import com.leafia.overwrite_contents.interfaces.IMixinTileEntityCore.DFCShock;
 import com.leafia.unsorted.*;
 import com.llib.exceptions.LeafiaDevFlaw;
 import com.llib.group.LeafiaSet;
@@ -34,6 +36,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LeafiaParticlePacket extends RecordablePacket {
 	/**
@@ -492,6 +499,73 @@ public class LeafiaParticlePacket extends RecordablePacket {
 			));
 		}
 	}
+	public static class DFCNukeParticle extends LeafiaParticle {
+		public int radius = 250;
+		public int maxAge = 20*3;
+		public int flashTime = 50;
+		@Override
+		protected LeafiaParticle fromBits(LeafiaBuf buf,NBTTagCompound nbt) {
+			DFCNukeParticle packet = new DFCNukeParticle();
+			packet.radius = buf.readInt();
+			packet.maxAge = buf.readInt();
+			packet.flashTime = buf.readInt();
+			return packet;
+		}
+		@Override
+		protected void toBits(LeafiaBuf buf) {
+			buf.writeInt(radius);
+			buf.writeInt(maxAge);
+			buf.writeInt(flashTime);
+		}
+		@Override
+		@SideOnly(Side.CLIENT)
+		protected void emit(NBTTagCompound nbt) {
+			World world = Minecraft.getMinecraft().world;
+			ParticleNuke nuke = new ParticleNuke(
+					world,
+					new BlockPos(nbt.getDouble("posX"),
+							nbt.getDouble("posY"),
+							nbt.getDouble("posZ")
+					)
+			);
+			nuke.radius = radius;
+			nuke.setMaxAge(maxAge);
+			nuke.flashTime = flashTime;
+			Minecraft.getMinecraft().effectRenderer.addEffect(nuke);
+		}
+	}
+	public static class DFCShockParticleEditionTM extends LeafiaParticle {
+		List<Vec3d> poses0;
+		public DFCShockParticleEditionTM() { }
+		public DFCShockParticleEditionTM(List<Vec3d> poses0) {
+			this.poses0 = poses0;
+		}
+		@Override
+		protected LeafiaParticle fromBits(LeafiaBuf buf,NBTTagCompound nbt) {
+			DFCShockParticleEditionTM particle = new DFCShockParticleEditionTM();
+			int length = buf.readByte();
+			particle.poses0 = new ArrayList<>(length);
+			for (int i = 0; i < length; i++)
+				particle.poses0.add(buf.readVec3d());
+			return particle;
+		}
+		@Override
+		protected void toBits(LeafiaBuf buf) {
+			buf.writeByte(poses0.size());
+			for (Vec3d vec3d : poses0)
+				buf.writeVec3d(vec3d);
+		}
+		@SideOnly(Side.CLIENT)
+		@Override
+		protected void emit(NBTTagCompound nbt) {
+			ParticleDFCShockParticleEditionTM particle = new ParticleDFCShockParticleEditionTM(
+					Minecraft.getMinecraft().world,
+					nbt.getDouble("posX"),nbt.getDouble("posY"),nbt.getDouble("posZ"),
+					poses0
+			);
+			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+		}
+	}
 
 
 
@@ -522,10 +596,23 @@ public class LeafiaParticlePacket extends RecordablePacket {
 	static {
 		for (Class<?> cl : LeafiaParticlePacket.class.getClasses()) {
 			if (LeafiaParticle.class.isAssignableFrom(cl)) {
+				boolean valid = true;
+				// foolproof
+				for (Method method : cl.getDeclaredMethods()) {
+					if (method.getName().equals("emit")) {
+						valid = false;
+						for (Annotation annotation : method.getAnnotations()) {
+							if (annotation instanceof SideOnly)
+								valid = true;
+						}
+					}
+				}
+				if (!valid)
+					throw new LeafiaDevFlaw("Particle "+cl.getSimpleName()+"#emit is missing a @SideOnly(Side.CLIENT) annotation!");
 				try {
 					registry.add(cl.asSubclass(LeafiaParticle.class).newInstance());
-				} catch (InstantiationException | IllegalAccessException exception) {
-					LeafiaDevFlaw flaw = new LeafiaDevFlaw("Exception during initialization of particles: "+exception.toString());
+				} catch (Throwable exception) { // literally go kys
+					LeafiaDevFlaw flaw = new LeafiaDevFlaw("Exception during initialization of particle "+cl.getSimpleName()+" "+exception.toString());
 					flaw.setStackTrace(exception.getStackTrace());
 					throw flaw;
 				}

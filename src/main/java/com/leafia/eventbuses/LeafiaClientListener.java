@@ -5,6 +5,7 @@ import com.custom_hbm.GuiBackupsWarning;
 import com.custom_hbm.sound.LCEAudioWrapperClientStartStop;
 import com.google.gson.JsonSyntaxException;
 import com.hbm.blocks.BlockDummyable;
+import com.hbm.blocks.generic.BlockControlPanel;
 import com.hbm.capability.HbmLivingProps;
 import com.hbm.config.ClientConfig;
 import com.hbm.config.GeneralConfig;
@@ -53,7 +54,11 @@ import com.leafia.settings.AddonConfig;
 import com.leafia.shit.leafiashader.BigBruh;
 import com.leafia.transformer.LeafiaGls;
 import com.leafia.unsorted.IEntityCustomCollision;
+import com.leafia.unsorted.StructuralIntegrityHandler;
+import com.leafia.unsorted.StructuralIntegrityHandler.SimulationData;
+import it.unimi.dsi.fastutil.longs.Long2BooleanOpenHashMap;
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.MusicTicker;
@@ -94,6 +99,8 @@ import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.GetCollisionBoxesEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Unload;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -300,6 +307,45 @@ public class LeafiaClientListener {
 		}
 	}
 	public static class HandlerClient {
+		public static void iQuit(FMLServerStoppedEvent evt) {
+			/*
+				@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@@@@%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@@%%%%%%@@@@@@@@@@@@@@@@@@@@@@%%@@@@@@@@@@@@@@@@@@@@@@@@@%*+++%@@@@@@@@
+				@@@@@@@@@@%+%%%%%%%@%%@@@@@@@%%%@@@%%%==%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##@@@@@@@@
+				@@@@@@@@@@%+%%%%%%%%%%%%%%%%%%%%%%-:::::-*%%%%%%%%%%%%%%%%%%%%%%%%%%###*@@@@@@@@
+				@@@@@@@@@@#+######%%%%%%%%%%%%%%%#:::::::*#%%%%%%##%###################*@@@@@@@@
+				@@@@@@@@@@#+%%%%%%%%%%%%%%%%%%%%%%#=::-:-+%%%%%%%%%%%%%%###############*@@@@@@@@
+				@@@@@@@@@@#+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%####################***%@@@@@@@
+				@@@@@@@@@*=--:::::::::-----------:::::::-:-=+++++++*####################@@@@@@@@
+				@@@@@@@@@@@@%+-:::::::::::::::::::::::::::::#@@+##%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@@@@%=::::::::::::::::::::::::::::-@@@#*%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@@@@%-:::::::::::::::::::::::::::-#@@@*#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@@@%=:::::::::::::::::::::::::::-#@@@##%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@@%=::::::::::::::::--------::-+####%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@%=:::::::::::::::--+%@@@@@%#%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@@+::::::::::::::::-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@@*::::::::::::::::-*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@%=:::::::::::::::-=@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@%=::::::::::::::-=%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+				@@@@@@@@%#-::::::::::::::*%%%%%%%%%%%%%%%%%%@@@@@@@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@
+				%%%%%%%%%%%*=-:::::::::::-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@%@@@@@@@@@@@@@@@@@
+				%%%%%%%%%%#**+=--::-==++**#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@%%@%@@@@@@@@@@@@@@@@@
+				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@%*%@@@%%%%%@@@@@@@@@@@@#%@@@@@@@@@@
+				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:+%%%--%@%%@@@%%@@%%@%:#@@@@@@
+				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*:%%:#%%%%%*-%*:%%@*:%@-*%#:*#@@@@@
+				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*:%%:#%%%%%+=%*:%%%*:%%-*%%:#%%%@@%
+				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*:%%#--+*-:=%%%:-+=-:%%-*%%--*%%%%%
+				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%+#%%%%%%%%%%%%%%%%%%%%%%
+				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			 */
+			LeafiaShakecam.instances.clear();
+		}
 		Map<AddonBiome,Float> getBiomeRatios(Entity entity) {
 			World world = entity.world;
 			int mops = 0;
@@ -375,6 +421,7 @@ public class LeafiaClientListener {
 			//event.setGreen((float)inMaterialColor.y);
 			//event.setBlue((float)inMaterialColor.z);
 		}
+		final Long2BooleanOpenHashMap ccpSupported = new Long2BooleanOpenHashMap();
 		/// For calls before addInformation, see com.leafia.dev.machine.MachineTooltip.addInfoASM()
 		@SubscribeEvent
 		public void drawTooltip(ItemTooltipEvent event) {
@@ -393,6 +440,34 @@ public class LeafiaClientListener {
 			if (event.getFlags().isAdvanced() && item.getCreativeTab() != null) {
 				list.add(TextFormatting.GREEN+"Creative Tab ID:");
 				list.add(TextFormatting.DARK_GREEN+" - "+item.getCreativeTab().tabLabel);
+			}
+			if (item instanceof ItemBlock ib && StructuralIntegrityHandler.AUTOMATIC) {
+				IBlockState state = null;
+				try {
+					state = ib.getBlock().getStateFromMeta(ib.getMetadata(event.getItemStack()));
+				} catch (Exception e) {
+					state = ib.getBlock().getDefaultState();
+				}
+				int mass = StructuralIntegrityHandler.getMass(state,null,null);
+				int glue = StructuralIntegrityHandler.getGlue(state,null,null);
+				list.add(TextFormatting.RED+"Structural Integrity:");
+				list.add(TextFormatting.DARK_RED+" - Mass: "+((mass != -1) ? mass : "?"));
+				list.add(TextFormatting.DARK_RED+" - Glue: "+((glue != -1) ? glue : "?"));
+			}
+			if (item instanceof ItemBlock ib) {
+				if (ib.getBlock() instanceof ITileEntityProvider prov) {
+					if (!ccpSupported.containsKey(prov.hashCode())) {
+						if (!(prov instanceof BlockControlPanel)) {
+							TileEntity fuckoff = null;
+							try {
+								fuckoff = prov.createNewTileEntity(Minecraft.getMinecraft().world,12);
+							} catch (Exception ignored) {}
+							ccpSupported.put(prov.hashCode(),fuckoff instanceof IControllable);
+						}
+					}
+					if (ccpSupported.get(prov.hashCode()))
+						list.add(TextFormatting.GREEN+"[CCP Compatible]");
+				}
 			}
 		}
 		@SubscribeEvent
@@ -429,6 +504,74 @@ public class LeafiaClientListener {
 				registerBlockModel(block, 0);
 			}
 		}
+		void renderBox(double ratio,float alpha) {
+			LeafiaBrush brush = LeafiaBrush.instance;
+			brush.startDrawing(BrushMode.LINES,DefaultVertexFormats.POSITION_COLOR);
+			{
+				// bottom line
+				float gb = ratio <= 0 ? 0 : 1;
+				brush.addVertexWithColor(-0.5,-0.5,-0.5,1,gb,gb,alpha);
+				brush.addVertexWithColor(0.5,-0.5,-0.5,1,gb,gb,alpha);
+
+				brush.addVertexWithColor(0.5,-0.5,-0.5,1,gb,gb,alpha);
+				brush.addVertexWithColor(0.5,-0.5,0.5,1,gb,gb,alpha);
+
+				brush.addVertexWithColor(0.5,-0.5,0.5,1,gb,gb,alpha);
+				brush.addVertexWithColor(-0.5,-0.5,0.5,1,gb,gb,alpha);
+
+				brush.addVertexWithColor(-0.5,-0.5,0.5,1,gb,gb,alpha);
+				brush.addVertexWithColor(-0.5,-0.5,-0.5,1,gb,gb,alpha);
+			}
+			{
+				// side lines
+				for (int xo = -1; xo <= 1; xo+=2) {
+					for (int zo = -1; zo <= 1; zo+=2) {
+						if (ratio > 0) {
+							brush.addVertexWithColor(-xo/2d,-0.5,-zo/2d,1,1,1,alpha);
+							brush.addVertexWithColor(-xo/2d,-0.5+ratio,-zo/2d,1,1,1,alpha);
+
+							brush.addVertexWithColor(xo/2d,-0.5,-zo/2d,1,1,1,alpha);
+							brush.addVertexWithColor(xo/2d,-0.5+ratio,-zo/2d,1,1,1,alpha);
+
+							brush.addVertexWithColor(-xo/2d,-0.5,zo/2d,1,1,1,alpha);
+							brush.addVertexWithColor(-xo/2d,-0.5+ratio,zo/2d,1,1,1,alpha);
+
+							brush.addVertexWithColor(xo/2d,-0.5,zo/2d,1,1,1,alpha);
+							brush.addVertexWithColor(xo/2d,-0.5+ratio,zo/2d,1,1,1,alpha);
+						}
+						if (ratio < 1) {
+							brush.addVertexWithColor(-xo/2d,-0.5+ratio,-zo/2d,1,0,0,alpha);
+							brush.addVertexWithColor(-xo/2d,0.5,-zo/2d,1,0,0,alpha);
+
+							brush.addVertexWithColor(xo/2d,-0.5+ratio,-zo/2d,1,0,0,alpha);
+							brush.addVertexWithColor(xo/2d,0.5,-zo/2d,1,0,0,alpha);
+
+							brush.addVertexWithColor(-xo/2d,-0.5+ratio,zo/2d,1,0,0,alpha);
+							brush.addVertexWithColor(-xo/2d,0.5,zo/2d,1,0,0,alpha);
+
+							brush.addVertexWithColor(xo/2d,-0.5+ratio,zo/2d,1,0,0,alpha);
+							brush.addVertexWithColor(xo/2d,0.5,zo/2d,1,0,0,alpha);
+						}
+					}
+				}
+			}
+			{
+				// top line
+				float gb = ratio >= 1 ? 1 : 0;
+				brush.addVertexWithColor(-0.5,0.5,-0.5,1,gb,gb,alpha);
+				brush.addVertexWithColor(0.5,0.5,-0.5,1,gb,gb,alpha);
+
+				brush.addVertexWithColor(0.5,0.5,-0.5,1,gb,gb,alpha);
+				brush.addVertexWithColor(0.5,0.5,0.5,1,gb,gb,alpha);
+
+				brush.addVertexWithColor(0.5,0.5,0.5,1,gb,gb,alpha);
+				brush.addVertexWithColor(-0.5,0.5,0.5,1,gb,gb,alpha);
+
+				brush.addVertexWithColor(-0.5,0.5,0.5,1,gb,gb,alpha);
+				brush.addVertexWithColor(-0.5,0.5,-0.5,1,gb,gb,alpha);
+			}
+			brush.draw();
+		}
 		@SubscribeEvent(priority = EventPriority.LOWEST)
 		public void renderWorld(RenderWorldLastEvent evt) {
 			if (AddonConfig.schizoMode) { // fuck the sky
@@ -441,12 +584,84 @@ public class LeafiaClientListener {
 				LeafiaGls.color(1,1,1);
 			}
 			AddonRainRender.INSTANCE.render(evt.getPartialTicks());
+			if (StructuralIntegrityHandler.AUTOMATIC) {
+				EntityPlayer player = Minecraft.getMinecraft().player;
+				ItemStack stack = player.getHeldItemMainhand();
+				if (stack.getItem() instanceof ItemBlock ib) {
+					Minecraft mc = Minecraft.getMinecraft();
+					World world = mc.world;
+					RayTraceResult mop = mc.objectMouseOver;
+					if (mop != null && mop.typeOfHit == mop.typeOfHit.BLOCK) {
+						BlockPos pos = mop.getBlockPos().offset(mop.sideHit);
+						SimulationData data = StructuralIntegrityHandler.handleBlockSimulate(world,pos,ib.getBlock().getStateFromMeta(ib.getDamage(stack)));
+						if (data != null) {
+							Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+							float partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
+							double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double) partialTicks;
+							double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double) partialTicks;
+							double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double) partialTicks;
+							LeafiaGls.pushMatrix();
+							LeafiaGls.translate(pos.getX()+0.5-x,pos.getY()+0.5-y,pos.getZ()+0.5-z);
+							LeafiaGls.inStack(()->{
+								LeafiaGls.color(1,1,1,1);
+								LeafiaGls.enableAlpha();
+								LeafiaGls.alphaFunc(GL11.GL_GREATER,0);
+								LeafiaGls.disableLighting();
+								LeafiaGls.enableBlend();
+								LeafiaGls.blendFunc(SourceFactor.SRC_ALPHA,DestFactor.ONE_MINUS_SRC_ALPHA);
+								LeafiaGls.disableTexture2D();
+								double offset = Math.floorMod(System.currentTimeMillis(),1000L)/1000d;
+								double r = 1-data.maxRatio;
+								if (data.maxRatio < 1) {
+									LeafiaGls.pushMatrix();
+									LeafiaGls.scale(0.75);
+									renderBox(r,0.75f);
+									LeafiaGls.popMatrix();
+									double pulsate = offset/0.75;
+									if (pulsate <= 1) {
+										LeafiaGls.pushMatrix();
+										LeafiaGls.scale(0.75+pulsate*0.15);
+										renderBox(r,(float)Math.pow(0.5-pulsate/2,1.5));
+										LeafiaGls.popMatrix();
+									}
+								} else {
+									LeafiaGls.pushMatrix();
+									double psin = Math.max(Math.sin(offset*Math.PI/0.75),0);
+									LeafiaGls.scale(0.75+0.1*(float)psin);
+									renderBox(r,0.75f);
+									LeafiaGls.popMatrix();
+								}
+							});
+							LeafiaGls.popMatrix();
+						}
+					}
+				}
+			}
 			TopRender.main(evt);
 		}
+		public static int dfcFlashTicks = 0;
 		@SubscribeEvent
 		public void onOverlayRenderPost(RenderGameOverlayEvent.Post evt) {
-			if(evt.getType() == ElementType.ALL)
-				Digamma.drawVignette(evt.getResolution(),evt.getPartialTicks());
+			if(evt.getType() == ElementType.ALL) {
+				ScaledResolution resolution = evt.getResolution();
+				Digamma.drawVignette(resolution,evt.getPartialTicks());
+				if (dfcFlashTicks > 0) { // dfc flash
+					LeafiaBrush brush = LeafiaBrush.instance;
+					Minecraft.getMinecraft().renderEngine.bindTexture(AddonBase.solid);
+					LeafiaGls.disableAlpha();
+					LeafiaGls.color(1,1,1,Math.max(0,Math.min(1,(dfcFlashTicks-evt.getPartialTicks())/100f)));
+					LeafiaGls.enableBlend();
+					LeafiaGls.blendFunc(SourceFactor.SRC_ALPHA,DestFactor.ONE);
+					brush.startDrawing(BrushMode.QUADS,DefaultVertexFormats.POSITION_TEX);
+					brush.addVertexWithUV(0,resolution.getScaledHeight_double(),0,0,1);
+					brush.addVertexWithUV(resolution.getScaledWidth_double(),resolution.getScaledHeight_double(),0,1,1);
+					brush.addVertexWithUV(resolution.getScaledWidth_double(),0,0,1,0);
+					brush.addVertexWithUV(0,0,0,0,0);
+					brush.draw();
+					LeafiaGls.enableAlpha();
+					LeafiaGls.blendFunc(SourceFactor.SRC_ALPHA,DestFactor.ONE_MINUS_SRC_ALPHA);
+				}
+			}
 		}
 		public static final ResourceLocation addonBadges = new ResourceLocation("leafia","textures/badges.png");
 		public static void renderBadges(ScaledResolution res, Gui gui) {
@@ -481,7 +696,16 @@ public class LeafiaClientListener {
 			if(trueExp) { offsetX += width; }
 			if(trueRam) { offsetX += width; }
 			if(true328) { offsetX += width; }
-			if(AddonConfig.schizoMode) { gui.drawTexturedModalRect(offsetX, offsetY, 0, 0, 24, 8); offsetX += width; }
+			boolean schz = AddonConfig.schizoMode;
+			boolean grav = StructuralIntegrityHandler.AUTOMATIC;
+			boolean is128 = true328 && schz && grav;
+			boolean ctcl = GeneralConfig.enableCataclysm;
+			boolean isNeg72 = is128 && ctcl;
+			if(schz) { gui.drawTexturedModalRect(offsetX, offsetY, 0, 0, 24, 8); offsetX += width; }
+			if(grav) { gui.drawTexturedModalRect(offsetX, offsetY, 24, 0, 24, 8); offsetX += width; }
+			if(is128) { gui.drawTexturedModalRect(offsetX, offsetY, 0, 8, 24, 8); offsetX += width; }
+			if(ctcl) { gui.drawTexturedModalRect(offsetX, offsetY, 48, 0, 24, 8); offsetX += width; }
+			if(isNeg72) { gui.drawTexturedModalRect(offsetX, offsetY, 24, 8, 24, 8); offsetX += width; }
 
 			Minecraft.getMinecraft().renderEngine.bindTexture(Gui.ICONS);
 			OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
@@ -678,7 +902,7 @@ public class LeafiaClientListener {
 			//multiplier *= IdkWhereThisShitBelongs.fovM;
 			float fovMultiplier = 1-Digamma.digammaDose*0.21428571428f;
 
-			e.setNewfov(e.getFov()*multiplier*fovMultiplier);
+			e.setNewfov(e.getNewfov()*multiplier*fovMultiplier);
 		}
 
 		public static final Logger LOGGER = LogManager.getLogger();
@@ -694,11 +918,21 @@ public class LeafiaClientListener {
 				this.addShader("drx",new ResourceLocation("leafia:shaders/help/digamma.json"));
 			}
 		}
+		public static float rx = 0;
+		public static float ry = 0;
+		public static float rz = 0;
 		@SubscribeEvent
 		public void renderTick(RenderTickEvent e){
 			EntityPlayer player = Minecraft.getMinecraft().player;
 			if (player != null) {
 				if (e.phase == Phase.END) {
+					GlStateManager.matrixMode(GL11.GL_TEXTURE);
+					GlStateManager.loadIdentity();
+					GL11.glTranslatef(rx,ry,rz);
+					rx = 0;
+					ry = 0;
+					rz = 0;
+					LeafiaGls.matrixMode(5888);
 					if (!AddonConfig.disableLCAShaders) {
 						boolean needsUpdate = false;
 						for (BigBruh shaderGroup : shaderGroups.values()) {
@@ -718,6 +952,7 @@ public class LeafiaClientListener {
 							}
 							LeafiaGls.popMatrix();
 						}
+						LeafiaGls.matrixMode(5888);
 					}
 				/*
 				//LeafiaGls.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -768,7 +1003,7 @@ public class LeafiaClientListener {
 					if (Minecraft.getMinecraft().world != null) {
 						List<TileEntity> entities = Minecraft.getMinecraft().world.loadedTileEntityList;
 						BlockPos pos = Minecraft.getMinecraft().player.getPosition();
-						if (validatedTEs.size() > 0) {
+						if (!validatedTEs.isEmpty()) {
 							Set<TileEntity> removalQueue = new HashSet<>();
 							for (TileEntity entity : validatedTEs) {
 								if (!entities.contains(entity) || !(entity instanceof LeafiaPacketReceiver))
@@ -784,7 +1019,8 @@ public class LeafiaClientListener {
 								validatedTEs.remove(entity);
 							}
 						}
-						for (TileEntity entity : entities) {
+						for (int i = 0; i < entities.size(); i++) {
+							TileEntity entity = entities.get(i);
 							if (!entity.isInvalid() && entity instanceof LeafiaPacketReceiver && !validatedTEs.contains(entity)) {
 								LeafiaPacketReceiver receiver = (LeafiaPacketReceiver)entity;
 								if (entity.getPos().getDistance(pos.getX(),pos.getY(),pos.getZ()) <= receiver.affectionRange()) {
